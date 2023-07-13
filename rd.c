@@ -40,15 +40,19 @@ int initialize_root_directory(int minEntreis, Direct * parent) {
 	int actualEnteries = bytesToAllocate/(sizeof(Direct));
 	
 	Direct * newD =malloc(sizeof(Direct));
+	time_t currentTime = time(NULL);
+
 	if(newD ==NULL)
+	
+	printf("here =%i",actualEnteries);
 		return -1;
 	for (int i=0; i<actualEnteries; i++){
 		strcpy(newD[i].name, "");
 		newD[i].size= 0;
 		newD[i].location=-1;
-		newD[i].creationTime=NULL;
-		newD[i].modifiedTime=NULL;
-		newD[i].accessedTime=NULL;
+		newD[i].creationTime=currentTime;
+		newD[i].modifiedTime=currentTime;
+		newD[i].accessedTime=currentTime;
 		newD[i].isADirectory=0;
 	
 	}
@@ -61,9 +65,9 @@ int initialize_root_directory(int minEntreis, Direct * parent) {
 		return -1;
 	}
 	newD[0].location = e->start;
-	newD[0].creationTime=NULL;
-	newD[0].modifiedTime=NULL;
-	newD[0].accessedTime=NULL;
+	newD[0].creationTime=currentTime;
+	newD[0].modifiedTime=currentTime;
+	newD[0].accessedTime=currentTime;
 	newD[0].isADirectory=1;
 	free(e);
 	strcpy(newD[1].name,"..");
@@ -75,14 +79,16 @@ int initialize_root_directory(int minEntreis, Direct * parent) {
 
 		newD[1].size = parent[0].size;
 		newD[1].location = parent[0].location;
-		newD[1].modifiedTime=NULL;
-		newD[1].accessedTime=NULL;
+		newD[1].modifiedTime=currentTime;
+		newD[1].accessedTime=currentTime;
 		newD[1].isADirectory=1;
 		
-	}
-	//LBAwrite(newD, numBlocks, newD[0].location);
+	}          
+	releaseBlocks(newD[1].location,numBlocks);
+	LBAwrite(newD, numBlocks, newD[0].location);
 	return (newD[0].location);
 	}
+
 
 	
 	
