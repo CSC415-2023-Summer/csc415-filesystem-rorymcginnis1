@@ -5,6 +5,7 @@
 #include <string.h>
 #include <time.h>
 #include "bitmap.c"
+
 #include "fsLow.h"
 
 #define NUM_DIRECT_ENTRIES 50
@@ -38,6 +39,10 @@ int initialize_root_directory(int minEntreis, Direct * parent) {
 	int bytesToAllocate =numBlocks*BLOCK_SIZE;
 	
 	int actualEnteries = bytesToAllocate/(sizeof(Direct));
+	
+	if (actualEnteries< minEntreis){
+		return -1;
+		}
 	
 	Direct * newD =malloc(sizeof(Direct));
 	time_t currentTime = time(NULL);
