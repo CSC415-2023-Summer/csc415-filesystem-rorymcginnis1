@@ -52,7 +52,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	
 	int minEnt = 2;
 	
-	DirectoryEntry * root = malloc(sizeof(DirectoryEntry));
+	struct DirectoryEntry * root = malloc(sizeof(DirectoryEntry));
 	
 	
 	int rd = initialize_root_directory(minEnt, root);

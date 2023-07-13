@@ -7,6 +7,6 @@
 
 #endif
 
-int initialize_root_directory(int minEntreis, DirectoryEntry * parent);
+int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent);
 
 

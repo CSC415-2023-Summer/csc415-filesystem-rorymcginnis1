@@ -11,7 +11,7 @@
 
 
 
-int initialize_root_directory(int minEntreis, DirectoryEntry * parent) {
+int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent) {
 
 
     	int bytesNeeded =(sizeof(DirectoryEntry)*NUM_DIRECT_ENTRIES);
@@ -25,13 +25,14 @@ int initialize_root_directory(int minEntreis, DirectoryEntry * parent) {
 		return -1;
 		}
 	
-	DirectoryEntry * newD =malloc(sizeof(DirectoryEntry));
+	struct DirectoryEntry * newD =malloc(sizeof(DirectoryEntry)*actualEnteries);
 	time_t currentTime = time(NULL);
 
-	if(newD ==NULL)
+	if(newD ==NULL){
 	
-	printf("here =%i",actualEnteries);
 		return -1;
+	}
+		
 	for (int i=0; i<actualEnteries; i++){
 		strcpy(newD[i].fileName, "");
 		newD[i].fileSize= 0;
@@ -74,6 +75,9 @@ int initialize_root_directory(int minEntreis, DirectoryEntry * parent) {
 	releaseBlocks(newD[1].fileLocation,numBlocks);
 	LBAwrite(newD, numBlocks, newD[0].fileLocation);
 	return (newD[0].fileLocation);
+	
+	
+	return 1;
 	
 
 	}
