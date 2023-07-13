@@ -89,7 +89,7 @@ int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent)
 		newD[1].isaDirectory=1;	
 	}          
 	releaseBlocks(newD[1].fileLocation,numBlocks);
-	LBAwrite(newD, numBlocks, newD[0].fileLocation);
+	LBAwrite(newD, numBlocks, 3);
 	return (newD[0].fileLocation);
 
 	}
