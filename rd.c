@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "bitmap.c"
 #include "fsInit.h"
 #include "fsLow.h"
 #include "rd.h"
@@ -75,6 +74,8 @@ int initialize_root_directory(int minEntreis, DirectoryEntry * parent) {
 	releaseBlocks(newD[1].fileLocation,numBlocks);
 	LBAwrite(newD, numBlocks, newD[0].fileLocation);
 	return (newD[0].fileLocation);
+	
+
 	}
 
 

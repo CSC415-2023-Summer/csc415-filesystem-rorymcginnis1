@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "fsLow.h"
-#include "fslnit.h"  
+#include "fsInit.h" 
+ 
 //need to make so can call vcb as seen in initfreespace
 
 
@@ -64,7 +65,7 @@ void serializeFreeSpaceMap() {
         }
     }
 
-    int writeResult = LBAwrite(theFreeSpaceMap, 5, 1);
+    int writeResult = 0;//LBAwrite(theFreeSpaceMap, 5, 1);
     //write to disk
     if (writeResult == -1) {
         printf("Writing theFreeSpaceMap to disk failed.\n");
@@ -218,7 +219,7 @@ void releaseBlocks(int start, int count) {
 
 
 
-
+/*
 // Example usage
 int main() {
     // Sample usage of the functions
@@ -256,4 +257,5 @@ int main() {
     free(extents);
     
     return 0;
-}
+}*/
+

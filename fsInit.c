@@ -23,36 +23,11 @@
 
 #include "fsLow.h"
 #include "mfs.h"
+#include "extents.c"
+#include "fsInit.h"
+#include "rd.c"
+ //signature number
 
-#define MAX_NAME_LENGTH 64
-#define MAGICNUMBER 0x1A3B5C //signature number
-
-
-
-struct VolumeControlBlock 
-	{	
-    char volumeName[256];
-	int totalBlockSize;      
-	int blockSize;   
-    int startBlock;    
-    int signature;
-    int numberOfBlocks;
-	int numberOfFreeBlocks;
-	// Created time??
-	
-	} VolumeControlBlock;
-
-//To hold our necessary data for a file, such as current date and name location size
-struct DirectoryEntry 
-	{ 
-	char fileName[MAX_NAME_LENGTH];
-	int fileLocation;
-	int fileSize;
-	time_t dateCreated;
-	time_t dateAccessed;
-	time_t dateModified;
-	int isaDirectory; // To decide if it's a folder or file?
-	} DirectoryEntry;
 
 int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	{
@@ -76,7 +51,21 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		vcbPointer->blockSize = blockSize;
 		LBAwrite (vcbPointer, 1, 0);
 	}
-
+	int fs = initFreeSpace();
+	if(fs!=6){
+		return -1;
+	}
+	
+	int minEnt = 2;
+	
+	DirectoryEntry * root =malloc(sizeof(DirectoryEntry));
+	
+	
+	int rd = initialize_root_directory(minEnt, root);
+	
+	if(rd<0){
+		return -1;
+	}
 
 
 	// else 
