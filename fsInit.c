@@ -25,6 +25,9 @@
 #include "mfs.h"
 
 #define MAX_NAME_LENGTH 64
+#define MAGICNUMBER 0x1A3B5C //signature number
+
+
 
 struct VolumeControlBlock 
 	{	
@@ -63,6 +66,19 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		printf("NULL");
 		return -1;
 	}
+
+	int test = LBAread(vcbPointer,1,0);
+
+	if (vcbPointer->signature != MAGICNUMBER)
+	{
+		vcbPointer->signature = MAGICNUMBER;
+		vcbPointer->totalBlockSize = numberOfBlocks;
+		vcbPointer->blockSize = blockSize;
+		LBAwrite (vcbPointer, 1, 0);
+	}
+
+
+
 	// else 
 	// {
 	// 	printf("Success")
