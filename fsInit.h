@@ -4,7 +4,9 @@
 #define NUM_DIRECT_ENTRIES 50
 #define MAX_NAME_LENGTH 255
 #define BLOCK_SIZE 512
-#define MAGICNUMBER 0x1A3B5C
+#define MAGICNUMBER 0x1A3B5C  //signature number
+#define NUM_DIRECT_ENTRIES 50
+
 
 typedef struct VolumeControlBlock 
 	{	
