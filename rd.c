@@ -5,46 +5,27 @@
 #include <string.h>
 #include <time.h>
 #include "bitmap.c"
-
+#include "fsInit.h"
 #include "fsLow.h"
 
-#define NUM_DIRECT_ENTRIES 50
-#define MAX_NAME_LENGTH 255
-#define BLOCK_SIZE 512
-
-typedef struct DirectoryEntry{
-char name [MAX_NAME_LENGTH];
-
-unsigned long size;
-
-unsigned long location;
-
-time_t creationTime;
-
-time_t modifiedTime;
-
-time_t accessedTime;
-
-int isADirectory;
-
-} Direct;
 
 
-int initialize_root_directory(int minEntreis, Direct * parent) {
+
+int initialize_root_directory(int minEntreis, DirectoryEntry * parent) {
 
 
-    	int bytesNeeded =(sizeof(Direct)*NUM_DIRECT_ENTRIES);
+    	int bytesNeeded =(sizeof(DirectoryEntry)*NUM_DIRECT_ENTRIES);
 	int numBlocks=(bytesNeeded +BLOCK_SIZE-1)/BLOCK_SIZE;
 	
 	int bytesToAllocate =numBlocks*BLOCK_SIZE;
 	
-	int actualEnteries = bytesToAllocate/(sizeof(Direct));
+	int actualEnteries = bytesToAllocate/(sizeof(DirectoryEntry));
 	
 	if (actualEnteries< minEntreis){
 		return -1;
 		}
 	
-	Direct * newD =malloc(sizeof(Direct));
+	DirectoryEntry * newD =malloc(sizeof(DirectoryEntry));
 	time_t currentTime = time(NULL);
 
 	if(newD ==NULL)
@@ -52,46 +33,47 @@ int initialize_root_directory(int minEntreis, Direct * parent) {
 	printf("here =%i",actualEnteries);
 		return -1;
 	for (int i=0; i<actualEnteries; i++){
-		strcpy(newD[i].name, "");
-		newD[i].size= 0;
-		newD[i].location=-1;
-		newD[i].creationTime=currentTime;
-		newD[i].modifiedTime=currentTime;
-		newD[i].accessedTime=currentTime;
-		newD[i].isADirectory=0;
+		strcpy(newD[i].fileName, "");
+		newD[i].fileSize= 0;
+		newD[i].fileLocation=-1;
+		newD[i].dateCreated=currentTime;
+		newD[i].dateAccessed=currentTime;
+		newD[i].dateModified=currentTime;
+		newD[i].isaDirectory=0;
 	
 	}
 	
-	strcpy(newD[0].name, ".");
-	newD[0].size= actualEnteries * (bytesToAllocate);
+	strcpy(newD[0].fileName, ".");
+	newD[0].fileSize= actualEnteries * (bytesToAllocate);
 	extent * e = allocateBlocks(numBlocks, numBlocks);
 	if(e ==NULL){
 		free(newD);
 		return -1;
 	}
-	newD[0].location = e->start;
-	newD[0].creationTime=currentTime;
-	newD[0].modifiedTime=currentTime;
-	newD[0].accessedTime=currentTime;
-	newD[0].isADirectory=1;
+	newD[0].fileLocation = e->start;
+	newD[0].dateCreated=currentTime;
+	newD[0].dateAccessed=currentTime;
+	newD[0].dateModified=currentTime;
+	newD[0].isaDirectory=1;
 	free(e);
-	strcpy(newD[1].name,"..");
+	strcpy(newD[1].fileName,"..");
 	if(parent == NULL){
 		parent = newD;
 	
 	}
 	else{
 
-		newD[1].size = parent[0].size;
-		newD[1].location = parent[0].location;
-		newD[1].modifiedTime=currentTime;
-		newD[1].accessedTime=currentTime;
-		newD[1].isADirectory=1;
+		newD[1].fileSize = parent[0].fileSize;
+		newD[1].fileLocation = parent[0].fileLocation;
+		newD[1].dateCreated=currentTime;
+		newD[1].dateAccessed=currentTime;
+		newD[1].dateModified=currentTime;
+		newD[1].isaDirectory=1;
 		
 	}          
-	releaseBlocks(newD[1].location,numBlocks);
-	LBAwrite(newD, numBlocks, newD[0].location);
-	return (newD[0].location);
+	releaseBlocks(newD[1].fileLocation,numBlocks);
+	LBAwrite(newD, numBlocks, newD[0].fileLocation);
+	return (newD[0].fileLocation);
 	}
 
 
