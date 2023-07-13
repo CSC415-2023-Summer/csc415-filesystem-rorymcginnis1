@@ -31,6 +31,7 @@
 
 int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	{
+
 	printf ("Initializing File System with %ld blocks with a block size of %ld\n", numberOfBlocks, blockSize);
 	/* TODO: Add any code you need to initialize your file system. */
 
@@ -43,28 +44,35 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	}
 
 	int test = LBAread(vcbPointer,1,0);
+	int fs = initFreeSpace();
+	if(fs != 6)
+	{
+		return -1;
+	}
+	
+	int minEnt = 2;
+	
+	DirectoryEntry * root = malloc(sizeof(DirectoryEntry));
+	
+	
+	int rd = initialize_root_directory(minEnt, root);
+	
+	//rd returns the root directory
+	
+
+	if(rd < 0)
+	{
+		return -1;
+	}
+
 
 	if (vcbPointer->signature != MAGICNUMBER)
 	{
 		vcbPointer->signature = MAGICNUMBER;
 		vcbPointer->totalBlockSize = numberOfBlocks;
 		vcbPointer->blockSize = blockSize;
+		vcbPointer->startBlock = rd;
 		LBAwrite (vcbPointer, 1, 0);
-	}
-	int fs = initFreeSpace();
-	if(fs!=6){
-		return -1;
-	}
-	
-	int minEnt = 2;
-	
-	DirectoryEntry * root =malloc(sizeof(DirectoryEntry));
-	
-	
-	int rd = initialize_root_directory(minEnt, root);
-	
-	if(rd<0){
-		return -1;
 	}
 
 
