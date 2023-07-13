@@ -75,9 +75,7 @@ int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent) {
 	releaseBlocks(newD[1].fileLocation,numBlocks);
 	LBAwrite(newD, numBlocks, newD[0].fileLocation);
 	return (newD[0].fileLocation);
-	
-	
-	return 1;
+
 	
 
 	}
