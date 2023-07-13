@@ -7,6 +7,7 @@
 #include "bitmap.c"
 #include "fsInit.h"
 #include "fsLow.h"
+#include "rd.h"
 
 
 
