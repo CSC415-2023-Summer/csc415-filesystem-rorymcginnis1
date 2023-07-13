@@ -11,7 +11,7 @@ int freeSpaceStartBlock = -1;       // Global variable to store the starting blo
 
 // Initialize the free space map
 int initFreeSpace(int blockCount, int bytesPerBlock) {
-    int requiredBytes = (blockCount / 8) + ((blockCount % 8) ? 1 : 0);  // Calculate the number of bytes required to represent the free space map
+    int requiredBytes = (blockCount + 7) / 8;  // Calculate the number of bytes required to represent the free space map
     int requiredBlocks = (requiredBytes / bytesPerBlock) + ((requiredBytes % bytesPerBlock) ? 1 : 0);  // Calculate the number of blocks required to store the free space map
 
     freeSpaceMap = (unsigned char*)malloc(requiredBlocks * bytesPerBlock);  // Allocate memory for the free space map
@@ -34,7 +34,7 @@ int initFreeSpace(int blockCount, int bytesPerBlock) {
 
 // Load the existing free space map from disk
 int loadFreeSpace(int blockCount, int bytesPerBlock) {
-    int requiredBytes = (blockCount / 8) + ((blockCount % 8) ? 1 : 0);  // Calculate the number of bytes required to represent the free space map
+   int requiredBytes = (blockCount + 7) / 8;  // Calculate the number of bytes required to represent the free space map
     int requiredBlocks = (requiredBytes / bytesPerBlock) + ((requiredBytes % bytesPerBlock) ? 1 : 0);  // Calculate the number of blocks required to store the free space map
 
     freeSpaceMap = (unsigned char*)malloc(requiredBlocks * bytesPerBlock);  // Allocate memory for the free space map
