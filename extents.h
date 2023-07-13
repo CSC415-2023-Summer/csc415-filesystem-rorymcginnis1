@@ -2,8 +2,8 @@
 // Created by Himal Shrestha on 7/10/23.
 //
 
-#ifndef CSC415_FILESYSTEM_RORYMCGINNIS1_BITMAP_H
-#define CSC415_FILESYSTEM_RORYMCGINNIS1_BITMAP_H
+#ifndef CSC415_FILESYSTEM_RORYMCGINNIS1_EXTENTS_H
+#define CSC415_FILESYSTEM_RORYMCGINNIS1_EXTENTS_H
 
 #endif //CSC415_FILESYSTEM_RORYMCGINNIS1_BITMAP_H
 
@@ -15,12 +15,12 @@ typedef struct extent {
 
 //initFreeSpace is called when you initialize the volume
 // it returns the block number where the freespace map starts
-int initFreeSpace(int blockCount, int bytesPerBlock);
+int initFreeSpace();
 
 // if the volume is already initialized you need to call loadFreeSpace so the system has
 // the freespace system ready to use.
 
-int loadFreeSpace (int blockCount, int bytesperBlock);
+int loadFreeSpace ();
 
 // These are the key functions that callers need to use to allocate disk blocks and free them.
 
@@ -38,3 +38,5 @@ extent * allocateBlocks (int required, int minPerExtent);
 // the blocks in a series of extents, they should loop through each extent calling
 // releaseBlocks for each extent.
 void releaseBlocks(int start, int count);
+void serializeFreeSpaceMap();
+
