@@ -138,6 +138,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	{
 		return -1;
 	}
+	serializeFreeSpaceMap();
 
 	//populate vcbPointer and write to the disk
 	if (vcbPointer->signature != MAGICNUMBER)
