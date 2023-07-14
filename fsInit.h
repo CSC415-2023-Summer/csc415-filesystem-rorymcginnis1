@@ -1,3 +1,19 @@
+/**************************************************************
+* Class:  CSC-415-0# Fall 2021
+* Names: Kaung Nay Htet, Himal Shrestha, Rory McGinnis,  James Donnelly
+* Student IDs:922292784, 922399514, 921337245, 917703805
+* GitHub Name: rorymcginnis1
+* Group Name: Team Drivers
+* Project: Basic File System
+*
+* File: fsInit.h
+*
+* Description: Header for the main driver.
+*
+* 
+*
+**************************************************************/
+
 #ifndef FSINIT_H
 #define FSINIT_H
 

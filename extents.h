@@ -1,6 +1,18 @@
-//
-// Created by Himal Shrestha on 7/10/23.
-//
+/**************************************************************
+* Class:  CSC-415-0# Fall 2021
+* Names: Kaung Nay Htet, Himal Shrestha, Rory McGinnis,  James Donnelly
+* Student IDs:922292784, 922399514, 921337245, 917703805
+* GitHub Name: rorymcginnis1
+* Group Name: Team Drivers
+* Project: Basic File System
+*
+* File: extents.h
+*
+* Description: Header for the file where we initalize allocate and release
+*
+* blocks for our system
+*
+**************************************************************/
 
 #ifndef CSC415_FILESYSTEM_RORYMCGINNIS1_EXTENTS_H
 #define CSC415_FILESYSTEM_RORYMCGINNIS1_EXTENTS_H

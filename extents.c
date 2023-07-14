@@ -1,3 +1,19 @@
+/**************************************************************
+* Class:  CSC-415-0# Fall 2021
+* Names: Kaung Nay Htet, Himal Shrestha, Rory McGinnis,  James Donnelly
+* Student IDs:922292784, 922399514, 921337245, 917703805
+* GitHub Name: rorymcginnis1
+* Group Name: Team Drivers
+* Project: Basic File System
+*
+* File: extents.c
+*
+* Description: The file where we initalize allocate and release
+*
+* blocks for our system
+*
+**************************************************************/
+
 #include "extents.h"
 #include "b_io.h"
 #include <stdlib.h>
@@ -65,7 +81,7 @@ void serializeFreeSpaceMap() {
         }
     }
 
-    int writeResult = 0;//LBAwrite(theFreeSpaceMap, 5, 1);
+    int writeResult = LBAwrite(theFreeSpaceMap, 5, 1);
     //write to disk
     if (writeResult == -1) {
         printf("Writing theFreeSpaceMap to disk failed.\n");
