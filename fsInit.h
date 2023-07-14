@@ -23,22 +23,20 @@
 #define MAGICNUMBER 0x1A3B5C  //signature number
 #define NUM_DIRECT_ENTRIES 50
 
-
-typedef struct VolumeControlBlock 
-	{	
-    char volumeName[256];
+//vcb structure
+typedef struct VolumeControlBlock {	
+    	char volumeName[256];
 	int totalBlockSize;      
 	int blockSize;   
-    int startBlock;    
-    int signature;
-    int numberOfBlocks;
+    	int startBlock;    
+    	int signature;
+    	int numberOfBlocks;
 	int numberOfFreeBlocks;
-	// Created time??
 	
 	} VolumeControlBlock;
 
-typedef struct DirectoryEntry 
-	{ 
+//Director Entry structure
+typedef struct DirectoryEntry { 
 	char fileName[MAX_NAME_LENGTH];
 	int fileLocation;
 	int fileSize;

@@ -32,37 +32,20 @@ int extentsCount = 1;//counter for extents
 
 // Function to initialize the freespace map
 int initFreeSpace() {
-    
-   //i put 320 cause thats what i figiured could fit into 5 blocks
+
     extents = (extent*)calloc(320,sizeof(extent));
-    //freee initially, full block ^^^^^^^^^
+
     extents[0].start = 6;  // Starting from block 6 as per requirements
     extents[0].count = blockCount -6;
     return 6; // Return the block number where the freespace map starts
 
-    //  if (vcb != NULL) {
-    //     vcb->startBlock = 6;
-    // }   this is for 3. change as needed
+
 }
 
 // Function to load the existing freespace map
 int loadFreeSpace() {
-    // if (totalBlockCount <= 0 || blockSize <= 0) {
-    //     return -1; // Invalid input parameters
-    // }
-    
-    // blockCount = totalBlockCount;
-    // bytesPerBlock = blockSize;
-    // extents = (extent*)malloc(sizeof(extent));
-    // extents[0].start = 0;
-    // extents[0].count = blockCount;
-    
-    // return 0;
+ 
     return initFreeSpace ();
-    //call for freeespace loadup
-
-
-    //^^^^^loads map by calling init with totalblocks and block size^^^^
 }
 
 
@@ -88,7 +71,7 @@ void serializeFreeSpaceMap() {
     }
 
     free(theFreeSpaceMap);
-    //freer the map
+    //frees the map
 }
 
 
@@ -138,24 +121,7 @@ extent* allocateBlocks(int required, int minPerExtent) {
     }
 
     return result;
-    ///return etents arry
 
-    // while (i < extentCount || extents[i].count >= required) {
-    //     if (extents[i].count >= required) {
-    //         result[extentCount].start = extents[i].start;
-    //         result[extentCount].count = required;
-    //         extents[i].start += required;
-    //         extents[i].count -= required;
-    //         if (extents[i].count == 0) {
-    //             extentCount++;
-    //         }
-    //         return result;
-    //     }
-    //     i++;
-    // }
-
-    // free(result);
-    // return NULL; // No suitable extents found
 
 }
 
@@ -200,78 +166,10 @@ void releaseBlocks(int start, int count) {
 
 
 
-    // while (start >= extents[i].count) {
-    //     start -= extents[i].count;
-    //     extentIndex++;
-    //     i++;
-    // }
-
-    // // Insert a new extent if the released blocks are not at the beginning of an existing extent
-    // if (start > 0) {
-    //     extentIndex++;
-    //     extents = (extent*)realloc(extents, (blockCount + 1) * sizeof(extent));
-    //     for (i = extentIndex; i < blockCount; i++) {
-    //         extents[i + 1] = extents[i];
-    //     }
-    //     extents[extentIndex - 1].count = start;
-    // }
-
-    // // Adjust the extent count and start position
-    // extents[extentIndex].start += count;
-    // extents[extentIndex].count -= count;
-    // if (extents[extentIndex].count == 0) {
-    //     extentIndex++;
-    // }
-
-    // // Remove any empty extents after releasing blocks
-    // for (i = extentIndex; i < blockCount; i++) {
-    //     extents[i] = extents[i + 1];
-    // }
     
-    // blockCount--;
 }
 
 
 
 
-
-/*
-// Example usage
-int main() {
-    // Sample usage of the functions
-    int totalBlockCount = 19531;
-    int blockSize = MINBLOCKSIZE;
-    int i;
-
-    int initResult = initFreeSpace(totalBlockCount, blockSize);
-    if (initResult == -1) {
-        printf("Invalid input parameters for initializing freespace map.\n");
-        return -1;
-    }
-    
-    extent* allocatedExtents = allocateBlocks(5, 5);
-    
-    if (allocatedExtents != NULL) {
-        // Blocks allocated successfully
-        printf("Allocated blocks:\n");
-        for (i = 0; allocatedExtents[i].count != 0; i++) {
-            printf("Start: %d, Count: %d\n", allocatedExtents[i].start, allocatedExtents[i].count);
-        }
-        
-        // Release the allocated blocks
-        for (i = 0; allocatedExtents[i].count != 0; i++) {
-            releaseBlocks(allocatedExtents[i].start, allocatedExtents[i].count);
-        }
-        
-        // Free the allocated extents array
-        free(allocatedExtents);
-    } else {
-        printf("Failed to allocate blocks.\n");
-    }
-    
-    // Free the extents array in the freespace map
-    free(extents);
-    
-    return 0;
-}*/
 
