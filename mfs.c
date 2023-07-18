@@ -16,9 +16,32 @@
 *
 *
 **************************************************************/
-
+#include <stdio.h>
+#include <string.h>
 #include "mfs.h"
 #include "b_io.h"
+#include "fsInit.h"
+extern struct DirectoryEntry *newD;
+int fs_stat( const char *path, struct fs_stat *buf)
+{
+
+	for (int i=0; i< NUM_DIRECT_ENTRIES; i++){
+		if(strcmp(path, newD[i].fileName)==0){
+			buf ->st_size = newD[i].fileSize;
+			buf-> st_blksize = BLOCK_SIZE;
+			buf-> st_blocks = (newD[i].fileSize + BLOCK_SIZE -1)/BLOCK_SIZE;
+			buf-> st_accesstime = newD[i].dateAccessed;
+			buf->st_modtime =newD[i].dateModified;
+			buf->st_createtime = newD[i].dateCreated;
+			
+			return 0;
+		
+		}
+		return -1;
+	
+	}
+
+}
 
 int fs_isFile(const char *filename) {
     struct fs_stat statbuf;
