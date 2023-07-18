@@ -43,6 +43,52 @@ int fs_stat( const char *path, struct fs_stat *buf)
 
 }
 
+int fs_delete(char* filename)
+{
+	if(fs_isFile (filename)){
+		for (int i=0; i<NUM_DIRECT_ENTRIES;i++){
+			if(strcmp(filename, newD[i].fileName)==0){
+				releaseBlocks(newD[i].fileLocation, (newD[i].fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
+				strcpy(newD[i].fileName, "");
+				newD[i].fileSize= 0;
+				newD[i].fileLocation=-1;
+				newD[i].dateCreated=NULL;
+				newD[i].dateAccessed=NULL;
+				newD[i].dateModified=NULL;
+				newD[i].isaDirectory=0;
+				return 0;
+	}
+	
+	
+			}
+		}
+		return -1;
+	
+	
+	}
+
+
+
+
+
+int fs_rmdir(const char *pathname){
+	if(fs_isDirectory){
+		if(fs_d_is_empty(*pathname)){
+		
+			
+		}
+		else{
+		return -1;
+		}
+	
+	}
+	else{return -1;}
+
+
+
+}
+
+
 int fs_isFile(const char *filename) {
     struct fs_stat statbuf;
     if (fs_stat(filename, &statbuf) == -1) {

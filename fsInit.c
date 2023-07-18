@@ -53,9 +53,9 @@ int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent)
 		strcpy(newD[i].fileName, "");
 		newD[i].fileSize= 0;
 		newD[i].fileLocation=-1;
-		newD[i].dateCreated=currentTime;
-		newD[i].dateAccessed=currentTime;
-		newD[i].dateModified=currentTime;
+		newD[i].dateCreated=NULL;
+		newD[i].dateAccessed=NULL;
+		newD[i].dateModified=NULL;
 		newD[i].isaDirectory=0;
 	}
 	//put data into the first directory . (self)
