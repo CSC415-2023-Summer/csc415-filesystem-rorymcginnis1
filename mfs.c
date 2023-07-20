@@ -72,7 +72,7 @@ int fs_delete(char* filename)
 
 
 int fs_rmdir(const char *pathname){
-	if(fs_isDirectory){
+	if(fs_isDir){
 		if(fs_d_is_empty(*pathname)){
 		
 			
@@ -90,51 +90,52 @@ int fs_rmdir(const char *pathname){
 
 
 int fs_isFile(const char *filename) {
-    struct fs_stat statbuf;
-    if (fs_stat(filename, &statbuf) == -1) {
-        return 0;   //assume not a file if 0 is returned
-    }
-    //see if it is a file
-    return fs_is_a_file(statbuf.fileType);  
-}         // may have to add to mfs.h header
+    for (int i=0; i < NUM_DIRECT_ENTRIES; i++)
+        if (strcmp(filename, newD[i].fileName) == 0){
+            return !newD[i].isaDirectory;
+        }
+        return 0; 
+        // file not found hence directory
+}         
 
 int fs_isDir(const char *pathname) {
-    struct fs_stat statbuf;
-    if (fs_stat(pathname, &statbuf) == -1) {
-        return 0;   
-        //assume not dir if 0 return
-    }
-    //see if dir
-    return fs_is_a_dir(statbuf.fileType); 
-            // may have to add to mfs.h header
-}
-
-int fs_mkdir(const char *pathname, mode_t mode) {
-    int creationStatus = 0; 
-
-    // attempt to create directory - mode 0 
-    //no permisionsss i think need to revisit
-    //need to chnage if we decide to add permissions
-    b_io_fd fd = b_open(pathname, 0);
-    if (fd < 0) {//check for existance
-        // dir doesnt already exist, creat4
-        fd = b_open(pathname, 1);
-        if (fd >= 0) {//check if created
-            b_close(fd);//created, then close
-        } else {
-            creationStatus  = -1; 
-            //creation err
+     for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
+        if (strcmp(pathname, newD[i].fileName) == 0) {
+            return newD[i].isaDirectory;
         }
-    } else {
-        // exists
-        creationStatus = -1;  
-        //err, exists
-        b_close(fd);
     }
+        return 0;   
+        //directory not found hence file
+    }
+    //see if dir 
 
-    return creationStatus;
-    //self-explanitory^^^
-}
+
+// int fs_mkdir(const char *pathname, mode_t mode) {
+//     int creationStatus = 0; 
+
+//     // attempt to create directory - mode 0 
+//     //no permisionsss i think need to revisit
+//     //need to chnage if we decide to add permissions
+//     b_io_fd fd = b_open(pathname, 0);
+//     if (fd < 0) {//check for existance
+//         // dir doesnt already exist, creat4
+//         fd = b_open(pathname, 1);
+//         if (fd >= 0) {//check if created
+//             b_close(fd);//created, then close
+//         } else {
+//             creationStatus  = -1; 
+//             //creation err
+//         }
+//     } else {
+//         // exists
+//         creationStatus = -1;  
+//         //err, exists
+//         b_close(fd);
+//     }
+
+//     return creationStatus;
+//     //self-explanitory^^^
+//}
 
 
 //below is irrelevant to this code but referenced for it
