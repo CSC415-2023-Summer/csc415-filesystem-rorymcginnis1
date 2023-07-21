@@ -133,6 +133,7 @@ int fs_mkdir(const char *pathname, mode_t mode) {
 
     // no available slot
     if (dirIndex == -1) {
+         printf("Failed to create directory '%s': No available slot.\n", pathname);
         return -1; // Return -1 indicating no space for the new directory
     }
 
@@ -148,7 +149,7 @@ int fs_mkdir(const char *pathname, mode_t mode) {
     globalDirEntries[dirIndex].dateCreated = currentTime;
     globalDirEntries[dirIndex].dateAccessed = currentTime;
     globalDirEntries[dirIndex].dateModified = currentTime;
-
+printf("Directory '%s' created successfully.\n", pathname);
     return 0; // Return 0 indicating that the directory was created successfully
 }
 
