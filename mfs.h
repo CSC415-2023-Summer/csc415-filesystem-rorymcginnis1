@@ -25,6 +25,14 @@
 #define FT_DIRECTORY DT_DIR
 #define FT_LINK	DT_LNK
 
+#ifndef blksize_t
+typedef int blksize_t;
+#endif
+
+#ifndef blkcnt_t
+typedef long blkcnt_t;
+#endif
+
 #ifndef uint64_t
 typedef u_int64_t uint64_t;
 #endif

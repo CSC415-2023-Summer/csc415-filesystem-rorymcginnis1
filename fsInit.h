@@ -46,5 +46,5 @@ typedef struct DirectoryEntry {
 	int isaDirectory; // To decide if it's a folder or file?
 	} DirectoryEntry;
 
-
+extern struct DirectoryEntry* globalDirEntries;
 #endif

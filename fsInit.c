@@ -25,6 +25,9 @@
 #include "extents.c"
 #include "fsInit.h"
 
+struct DirectoryEntry* globalDirEntries = NULL;
+
+
 //initalize the root directory
 int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent)
 {
@@ -48,6 +51,10 @@ int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent)
 	
 		return -1;
 	}
+
+	
+	globalDirEntries = newD;	
+	
 	//initalize the NewDirectory we created with empty data
 	for (int i=0; i<actualEnteries; i++){
 		strcpy(newD[i].fileName, "");

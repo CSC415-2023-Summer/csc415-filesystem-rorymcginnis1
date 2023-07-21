@@ -22,18 +22,18 @@
 #include "b_io.h"
 #include "fsInit.h"
 #include <time.h>
-extern struct DirectoryEntry *newD;
+extern struct DirectoryEntry *globalDirEntries;
 int fs_stat( const char *path, struct fs_stat *buf)
 {
 
 	for (int i=0; i< NUM_DIRECT_ENTRIES; i++){
-		if(strcmp(path, newD[i].fileName)==0){
-			buf ->st_size = newD[i].fileSize;
+		if(strcmp(path, globalDirEntries[i].fileName)==0){
+			buf ->st_size = globalDirEntries[i].fileSize;
 			buf-> st_blksize = BLOCK_SIZE;
-			buf-> st_blocks = (newD[i].fileSize + BLOCK_SIZE -1)/BLOCK_SIZE;
-			buf-> st_accesstime = newD[i].dateAccessed;
-			buf->st_modtime =newD[i].dateModified;
-			buf->st_createtime = newD[i].dateCreated;
+			buf-> st_blocks = (globalDirEntries[i].fileSize + BLOCK_SIZE -1)/BLOCK_SIZE;
+			buf-> st_accesstime = globalDirEntries[i].dateAccessed;
+			buf->st_modtime =globalDirEntries[i].dateModified;
+			buf->st_createtime = globalDirEntries[i].dateCreated;
 			
 			return 0;
 		
@@ -115,7 +115,7 @@ int fs_mkdir(const char *pathname, mode_t mode) {
     // iterate over directory
     for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
         // filename matches pathname?
-        if (strcmp(newD[i].fileName, pathname) == 0) {
+        if (strcmp(globalDirEntries[i].fileName, pathname) == 0) {
             return -1; // Return -1 as the directory already exists
         }
     }
@@ -125,7 +125,7 @@ int fs_mkdir(const char *pathname, mode_t mode) {
     for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
         // fileName of the current directoryentry  is an empty string,
         // slot available
-        if (newD[i].fileName[0] == '\0') { 
+        if (globalDirEntries[i].fileName[0] == '\0') { 
             dirIndex = i; // slot, store its index
             break; // Break
         }
@@ -137,17 +137,17 @@ int fs_mkdir(const char *pathname, mode_t mode) {
     }
 
     // Initialize the new directory entry
-    strncpy(newD[dirIndex].fileName, pathname, MAX_NAME_LENGTH); // Copy the pathname into the fileName
-    newD[dirIndex].fileSize = 0; // Initial size of directory is 0
-    newD[dirIndex].fileLocation = -1; // Set fileLocation to an invalid value (-1) indicating the directory is initially empty
-    newD[dirIndex].isaDirectory = 1; // Flag to indicate that this entry is a directory
+    strncpy(globalDirEntries[dirIndex].fileName, pathname, MAX_NAME_LENGTH); // Copy the pathname into the fileName
+    globalDirEntries[dirIndex].fileSize = 0; // Initial size of directory is 0
+    globalDirEntries[dirIndex].fileLocation = -1; // Set fileLocation to an invalid value (-1) indicating the directory is initially empty
+    globalDirEntries[dirIndex].isaDirectory = 1; // Flag to indicate that this entry is a directory
 
     // Get the current time
     time_t currentTime = time(NULL);
     // Set dateCreated, dateAccessed, and dateModified to current time
-    newD[dirIndex].dateCreated = currentTime;
-    newD[dirIndex].dateAccessed = currentTime;
-    newD[dirIndex].dateModified = currentTime;
+    globalDirEntries[dirIndex].dateCreated = currentTime;
+    globalDirEntries[dirIndex].dateAccessed = currentTime;
+    globalDirEntries[dirIndex].dateModified = currentTime;
 
     return 0; // Return 0 indicating that the directory was created successfully
 }
@@ -155,49 +155,3 @@ int fs_mkdir(const char *pathname, mode_t mode) {
 
 
 
-//below is irrelevant to this code but referenced for it
-//delete later, or at least reformat so noot over 100 char inline
-//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-//------------------------------------------------------------------
-//saw fileType below in the README file
-//line 74
-// struct fs_diriteminfo
-//     {
-//     unsigned short d_reclen;    /* length of this record */
-//     unsigned char fileType;    
-//     char d_name[256]; 			/* filename max filename is 255 characters */
-//     };
-
-//saw the statbuf is fsshell.c
-//line 93
-// int displayFiles (fdDir * dirp, int flall, int fllong)
-// 	{
-// #if (CMDLS_ON == 1)				
-// 	if (dirp == NULL)	//get out if error
-// 		return (-1);
-	
-// 	struct fs_diriteminfo * di;
-// 	struct fs_stat statbuf;
-	
-// 	di = fs_readdir (dirp);
-// 	printf("\n");
-// 	while (di != NULL) 
-// 		{
-// 		if ((di->d_name[0] != '.') || (flall)) //if not all and starts with '.' it is hidden
-// 			{
-// 			if (fllong)
-// 				{
-// 				fs_stat (di->d_name, &statbuf);
-// 				printf ("%s    %9ld   %s\n", fs_isDir(di->d_name)?"D":"-", statbuf.st_size, di->d_name);
-// 				}
-// 			else
-// 				{
-// 				printf ("%s\n", di->d_name);
-// 				}
-// 			}
-// 		di = fs_readdir (dirp);
-// 		}
-// 	fs_closedir (dirp);
-// #endif
-// 	return 0;
-// 	}
