@@ -22,7 +22,104 @@
 #include "b_io.h"
 #include "fsInit.h"
 #include <time.h>
+
 extern struct DirectoryEntry *globalDirEntries;
+
+
+// Parsepath code begins ---->
+
+// Current temporary use value, need change, or set, later
+char cwd[100] = "./../";
+
+char tmpcwd[100]; // For testing use
+char tokenArray[20][100]; // 20 is temporary count of string tokens, 100 characters in each
+int arrayCount = 0; // Accompanying value to count the tokenArray
+
+/*
+* parsePath() 
+* Tokenizes cwd, and uses / as a delimeter to cut out each name
+* Iterates through token while it is not NULL
+* Stores each token into our token array
+* Then sets our tmpcwd to the tokenArray
+* Parameter parentParse determines if we are doing a parse to look
+* for the parent vs parsing for our change directory function. They
+* are called with 1 or 0
+*/
+
+
+// If we would like to add the "text input" for the parse path string, we can add additional
+// parameter, and work from that. The additional parameter would change the global value of 
+// cwd or tempcwd
+// Parameter is the "mode"
+
+int parsePath(int parentParse){ //return int instead void, return i value thats index array
+    //printf("\nCWDTEST2 : %s\n", cwd);    
+    char * token = strtok(cwd, "/");
+    //printf("\nCWDTEST3 : %s\n", cwd); 
+    strcpy(tmpcwd, "\0");
+
+    // Iterate through the token   
+    while( token != NULL ) 
+    {
+      //printf( "\nTOKEN: %s", token ); //printing each token
+      arrayCount++;
+      strcpy(tokenArray[arrayCount],token);
+      //printf( "\nTOKEN stored: %s", tokenArray[arrayCount]); //print
+      resetCWD();
+
+      token = strtok(NULL, "/");
+    }
+
+    if (parentParse == 1)
+    {
+        // Return the indeex for parent of parse-pathed-value
+        // -1 the tail entry
+
+        for(int i = 1; i < arrayCount+1; i++) 
+        {
+            strcpy(cwd + strlen(cwd),  tokenArray[i]);
+            strcpy(cwd + strlen(cwd),  "/");
+        }
+        //printf("\nTEMPCWDTEST4 : %s\n", tmpcwd); 
+        
+        for (int i = 1; i < 52; i++)
+        {
+            //printf("\nSEARCHES: %s", directoryEntry[i].fileName);
+            if (strcmp(globalDirEntries[i].fileName , tokenArray[arrayCount]) == 0)
+            { //either arraycount or arraycount - 1
+            //printf("Parent is : %s\n", tokenArray[arrayCount]);
+            // printf("CWD : %s\n", cwd);
+            return i;
+            }
+        }
+    }
+
+    if (parentParse == 0)
+    {
+        // Return the index for parse-pathed-value
+        // -1 the tail entry
+
+        for(int i = 1; i < arrayCount; i++)
+        {
+        strcpy(tmpcwd + strlen(tmpcwd),  tokenArray[i]); 
+        strcpy(tmpcwd + strlen(tmpcwd),  "/");
+        }
+        return 0;
+    }
+    
+
+}
+
+// Helper function to reset cwd 
+void resetCWD() { //comment code and uncomment for debugging
+    //printf("\nBEFORE:\nTMPCWD: %s\nCWD%s", tmpcwd, cwd); //debugging
+    strcpy(tmpcwd,  "\0");
+    strcpy(cwd,  "\0");
+    //printf("\nAfter:\nTMPCWD: %s\nCWD%s", tmpcwd, cwd); //debugging
+}
+
+// <------ Parsepath code ends
+
 int fs_stat( const char *path, struct fs_stat *buf)
 {
 
