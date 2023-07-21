@@ -21,6 +21,7 @@
 #include "mfs.h"
 #include "b_io.h"
 #include "fsInit.h"
+#include <time.h>
 extern struct DirectoryEntry *newD;
 int fs_stat( const char *path, struct fs_stat *buf)
 {
@@ -43,99 +44,115 @@ int fs_stat( const char *path, struct fs_stat *buf)
 
 }
 
-int fs_delete(char* filename)
-{
-	if(fs_isFile (filename)){
-		for (int i=0; i<NUM_DIRECT_ENTRIES;i++){
-			if(strcmp(filename, newD[i].fileName)==0){
-				releaseBlocks(newD[i].fileLocation, (newD[i].fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
-				strcpy(newD[i].fileName, "");
-				newD[i].fileSize= 0;
-				newD[i].fileLocation=-1;
-				newD[i].dateCreated=NULL;
-				newD[i].dateAccessed=NULL;
-				newD[i].dateModified=NULL;
-				newD[i].isaDirectory=0;
-				return 0;
-	}
+// int fs_delete(char* filename)
+// {
+// 	if(fs_isFile (filename)){
+// 		for (int i=0; i<NUM_DIRECT_ENTRIES;i++){
+// 			if(strcmp(filename, newD[i].fileName)==0){
+// 				releaseBlocks(newD[i].fileLocation, (newD[i].fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
+// 				strcpy(newD[i].fileName, "");
+// 				newD[i].fileSize= 0;
+// 				newD[i].fileLocation=-1;
+// 				newD[i].dateCreated=NULL;
+// 				newD[i].dateAccessed=NULL;
+// 				newD[i].dateModified=NULL;
+// 				newD[i].isaDirectory=0;
+// 				return 0;
+// 	}
 	
 	
-			}
-		}
-		return -1;
+// 			}
+// 		}
+// 		return -1;
 	
 	
-	}
+// 	}
 
 
 
 
 
-int fs_rmdir(const char *pathname){
-	if(fs_isDir){
-		if(fs_d_is_empty(*pathname)){
+// int fs_rmdir(const char *pathname){
+// 	if(fs_isDir){
+// 		if(fs_d_is_empty(*pathname)){
 		
 			
-		}
-		else{
-		return -1;
-		}
+// 		}
+// 		else{
+// 		return -1;
+// 		}
 	
-	}
-	else{return -1;}
+// 	}
+// 	else{return -1;}
 
 
 
+// }
+
+
+// int fs_isFile(const char *filename) {
+//     for (int i=0; i < NUM_DIRECT_ENTRIES; i++)
+//         if (strcmp(filename, newD[i].fileName) == 0){
+//             return !newD[i].isaDirectory;
+//         }
+//         return 0; 
+//         // file not found hence directory
+// }         
+
+// int fs_isDir(const char *pathname) {
+//      for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
+//         if (strcmp(pathname, newD[i].fileName) == 0) {
+//             return newD[i].isaDirectory;
+//         }
+//     }
+//         return 0;   
+//         //directory not found hence file
+//     }
+//     //see if dir 
+
+
+int fs_mkdir(const char *pathname, mode_t mode) {
+    // iterate over directory
+    for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
+        // filename matches pathname?
+        if (strcmp(newD[i].fileName, pathname) == 0) {
+            return -1; // Return -1 as the directory already exists
+        }
+    }
+
+    // find available spot for directory entry
+    int dirIndex = -1; // Index of the available directory entry slot
+    for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
+        // fileName of the current directoryentry  is an empty string,
+        // slot available
+        if (newD[i].fileName[0] == '\0') { 
+            dirIndex = i; // slot, store its index
+            break; // Break
+        }
+    }
+
+    // no available slot
+    if (dirIndex == -1) {
+        return -1; // Return -1 indicating no space for the new directory
+    }
+
+    // Initialize the new directory entry
+    strncpy(newD[dirIndex].fileName, pathname, MAX_NAME_LENGTH); // Copy the pathname into the fileName
+    newD[dirIndex].fileSize = 0; // Initial size of directory is 0
+    newD[dirIndex].fileLocation = -1; // Set fileLocation to an invalid value (-1) indicating the directory is initially empty
+    newD[dirIndex].isaDirectory = 1; // Flag to indicate that this entry is a directory
+
+    // Get the current time
+    time_t currentTime = time(NULL);
+    // Set dateCreated, dateAccessed, and dateModified to current time
+    newD[dirIndex].dateCreated = currentTime;
+    newD[dirIndex].dateAccessed = currentTime;
+    newD[dirIndex].dateModified = currentTime;
+
+    return 0; // Return 0 indicating that the directory was created successfully
 }
 
 
-int fs_isFile(const char *filename) {
-    for (int i=0; i < NUM_DIRECT_ENTRIES; i++)
-        if (strcmp(filename, newD[i].fileName) == 0){
-            return !newD[i].isaDirectory;
-        }
-        return 0; 
-        // file not found hence directory
-}         
-
-int fs_isDir(const char *pathname) {
-     for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
-        if (strcmp(pathname, newD[i].fileName) == 0) {
-            return newD[i].isaDirectory;
-        }
-    }
-        return 0;   
-        //directory not found hence file
-    }
-    //see if dir 
-
-
-// int fs_mkdir(const char *pathname, mode_t mode) {
-//     int creationStatus = 0; 
-
-//     // attempt to create directory - mode 0 
-//     //no permisionsss i think need to revisit
-//     //need to chnage if we decide to add permissions
-//     b_io_fd fd = b_open(pathname, 0);
-//     if (fd < 0) {//check for existance
-//         // dir doesnt already exist, creat4
-//         fd = b_open(pathname, 1);
-//         if (fd >= 0) {//check if created
-//             b_close(fd);//created, then close
-//         } else {
-//             creationStatus  = -1; 
-//             //creation err
-//         }
-//     } else {
-//         // exists
-//         creationStatus = -1;  
-//         //err, exists
-//         b_close(fd);
-//     }
-
-//     return creationStatus;
-//     //self-explanitory^^^
-//}
 
 
 //below is irrelevant to this code but referenced for it
