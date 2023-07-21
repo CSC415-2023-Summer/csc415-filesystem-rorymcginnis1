@@ -90,25 +90,25 @@ int fs_stat( const char *path, struct fs_stat *buf)
 // }
 
 
-// int fs_isFile(const char *filename) {
-//     for (int i=0; i < NUM_DIRECT_ENTRIES; i++)
-//         if (strcmp(filename, newD[i].fileName) == 0){
-//             return !newD[i].isaDirectory;
-//         }
-//         return 0; 
-//         // file not found hence directory
-// }         
+int fs_isFile(char *filename) {
+    for (int i=0; i < NUM_DIRECT_ENTRIES; i++)
+        if (strcmp(filename, globalDirEntries[i].fileName) == 0){
+            return !globalDirEntries[i].isaDirectory;
+        }
+        return 0; 
+        // file not found hence directory
+}         
 
-// int fs_isDir(const char *pathname) {
-//      for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
-//         if (strcmp(pathname, newD[i].fileName) == 0) {
-//             return newD[i].isaDirectory;
-//         }
-//     }
-//         return 0;   
-//         //directory not found hence file
-//     }
-//     //see if dir 
+int fs_isDir(char *pathname) {
+     for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
+        if (strcmp(pathname, globalDirEntries[i].fileName) == 0) {
+            return globalDirEntries[i].isaDirectory;
+        }
+    }
+        return 0;   
+        //directory not found hence file
+    }
+    //see if dir 
 
 
 int fs_mkdir(const char *pathname, mode_t mode) {
