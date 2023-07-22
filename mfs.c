@@ -261,12 +261,8 @@ char * fs_getcwd(char *pathname, size_t size) {
         printf("Invalid buffer.\n");
         return NULL;
     }
-
-    // Get the current working directory from your file system (e.g., keep track of it as you traverse the file system)
-    // For this implementation, let's assume you have a variable called "currentWorkingDirectory" that holds the current working directory as a string.
-
     // Copy the current working directory to the provided buffer
-    // Make sure to handle cases where the buffer size is insufficient
+  
     if (strlen(cwd) >= size) {
         printf("Buffer size too small to hold the current working directory.\n");
         return NULL;
