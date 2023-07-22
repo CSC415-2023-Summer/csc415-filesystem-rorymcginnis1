@@ -145,50 +145,54 @@ int fs_stat( const char *path, struct fs_stat *buf)
 
 }
 
-// int fs_delete(char* filename)
-// {
-// 	if(fs_isFile (filename)){
-// 		for (int i=0; i<NUM_DIRECT_ENTRIES;i++){
-// 			if(strcmp(filename, newD[i].fileName)==0){
-// 				releaseBlocks(newD[i].fileLocation, (newD[i].fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
-// 				strcpy(newD[i].fileName, "");
-// 				newD[i].fileSize= 0;
-// 				newD[i].fileLocation=-1;
-// 				newD[i].dateCreated=NULL;
-// 				newD[i].dateAccessed=NULL;
-// 				newD[i].dateModified=NULL;
-// 				newD[i].isaDirectory=0;
-// 				return 0;
-// 	}
-	
-	
-// 			}
-// 		}
-// 		return -1;
-	
-	
-// 	}
-
-
-
-
-
-// int fs_rmdir(const char *pathname){
-// 	if(fs_isDir){
-// 		if(fs_d_is_empty(*pathname)){
-		
+int fs_delete(char* filename)
+{
+	for (int i=0; i<NUM_DIRECT_ENTRIES; i++){
+		if(strcmp(globalDirEntries[i].fileName, filename) ==0){
+			strncpy(globalDirEntries[i].fileName, "", MAX_NAME_LENGTH);
+    			globalDirEntries[i].fileSize = 0;
+    			globalDirEntries[i].fileLocation = -1;
+    			globalDirEntries[i].isaDirectory = 1;
+    			time_t currentTime = time(NULL);
+    			globalDirEntries[i].dateCreated = NULL;
+    			globalDirEntries[i].dateAccessed = NULL;
+  			globalDirEntries[i].dateModified = NULL;
+			printf("File '%s' removed successfully.\n", filename);
+			return 0;
 			
-// 		}
-// 		else{
-// 		return -1;
-// 		}
+		}
+	}
+
+return -1;
 	
-// 	}
-// 	else{return -1;}
+	
+}
 
 
 
-// }
+
+int fs_rmdir(const char *pathname){
+	for (int i=0; i<NUM_DIRECT_ENTRIES; i++){
+		if(strcmp(globalDirEntries[i].fileName, pathname) ==0){
+			if(globalDirEntries[i].fileSize==0){
+				strncpy(globalDirEntries[i].fileName, "", MAX_NAME_LENGTH);
+    				globalDirEntries[i].fileSize = 0;
+    				globalDirEntries[i].fileLocation = -1;
+    				globalDirEntries[i].isaDirectory = 1;
+    				time_t currentTime = time(NULL);
+    				globalDirEntries[i].dateCreated = NULL;
+    				globalDirEntries[i].dateAccessed = NULL;
+  				globalDirEntries[i].dateModified = NULL;
+				printf("Directory '%s' removed successfully.\n", pathname);
+				return 0;
+			}
+		}
+	}
+	
+	return -1;
+	
+
+}
 
 
 int fs_isFile(char *filename) {
