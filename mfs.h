@@ -17,7 +17,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
-
+#include "fsInit.h"
 #include "b_io.h"
 
 #include <dirent.h>
@@ -25,9 +25,10 @@
 #define FT_DIRECTORY DT_DIR
 #define FT_LINK	DT_LNK
 
-#ifndef blksize_t
-typedef int blksize_t;
-#endif
+// May need this later
+// #ifndef blksize_t
+// typedef int blksize_t;
+// #endif
 
 #ifndef blkcnt_t
 typedef long blkcnt_t;
@@ -59,12 +60,13 @@ struct fs_diriteminfo
 // from a directory.  This structure helps you (the file system) keep track of
 // which directory entry you are currently processing so that everytime the caller
 // calls the function readdir, you give the next entry in the directory
-typedef struct
+typedef struct fdDir
+
 	{
 	/*****TO DO:  Fill in this structure with what your open/read directory needs  *****/
 	unsigned short  d_reclen;		/* length of this record */
 	unsigned short	dirEntryPosition;	/* which directory entry position, like file pos */
-	//DE *	directory;			/* Pointer to the loaded directory you want to iterate */
+	DirectoryEntry directory;			/* Pointer to the loaded directory you want to iterate */
 	struct fs_diriteminfo * di;		/* Pointer to the structure you return from read */
 	} fdDir;
 
@@ -101,4 +103,3 @@ struct fs_stat
 int fs_stat(const char *path, struct fs_stat *buf);
 
 #endif
-
