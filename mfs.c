@@ -72,8 +72,6 @@ int parsePath(int parentParse){ //return int instead void, return i value thats 
       token = strtok(NULL, "/");
     } 
 
-   
-
     if (parentParse == 1)
     {
         // Return the indeex for parent of parse-pathed-value
@@ -96,33 +94,36 @@ int parsePath(int parentParse){ //return int instead void, return i value thats 
             return i;
             }
         }
+
+        return 0;
     }
 
     if (parentParse == 0)
     {
         // Return the index for parse-pathed-value
-        // -1 the tail entry
+        // the tail entry
 
         for(int i = 1; i < arrayCount; i++)
         {
         strcpy(tmpcwd + strlen(tmpcwd),  tokenArray[i]); 
         strcpy(tmpcwd + strlen(tmpcwd),  "/");
         }
+
+        for (int i = 1; i < 52; i++)
+        {
+            //printf("\nSEARCHES: %s", directoryEntry[i].fileName);
+            if (strcmp(globalDirEntries[i].fileName , tokenArray[arrayCount]) == 0)
+            { //either arraycount or arraycount - 1
+            //printf("Parent is : %s\n", tokenArray[arrayCount]);
+            // printf("CWD : %s\n", cwd);
+            return i;
+            }
+        }
+
         return 0;
     }
     
-
 }
-
-// Helper function to reset cwd 
-void resetCWD() { //comment code and uncomment for debugging
-    //printf("\nBEFORE:\nTMPCWD: %s\nCWD%s", tmpcwd, cwd); //debugging
-    strcpy(tmpcwd,  "\0");
-    strcpy(cwd,  "\0");
-    //printf("\nAfter:\nTMPCWD: %s\nCWD%s", tmpcwd, cwd); //debugging
-}
-
-// <------ Parsepath code ends
 
 int fs_stat( const char *path, struct fs_stat *buf)
 {
@@ -256,66 +257,48 @@ printf("Directory '%s' created successfully.\n", pathname);
 
 
 char * fs_getcwd(char *pathname, size_t size) {
+    
     // Check if the provided buffer is valid
     if (pathname == NULL || size == 0) {
         printf("Invalid buffer.\n");
         return NULL;
     }
 
-    // Get the current working directory from your file system (e.g., keep track of it as you traverse the file system)
-    // For this implementation, let's assume you have a variable called "currentWorkingDirectory" that holds the current working directory as a string.
-
-    // Copy the current working directory to the provided buffer
-    // Make sure to handle cases where the buffer size is insufficient
     if (strlen(cwd) >= size) {
         printf("Buffer size too small to hold the current working directory.\n");
         return NULL;
     }
 
-    strncpy(pathname, cwd, size);
-    // pathname[size - 1] = '\0'; // Ensure the buffer is null-terminated
+    // Copy the current working directory to the provided buffer
+
+    strncpy(pathname, cwd, size-1);
+
+    pathname[size - 1] = '\0'; // Ensure the buffer is null-terminated
 
     return pathname;
 }
 
-int fs_setcwd(char *pathname) {
-    // If the provided pathname is ".", no need to change the current working directory.
-    if (strcmp(pathname, ".") == 0) {
-        return 0; // Successfully set the current working directory (no change).
+// Function to set the current working directory
+int fs_setcwd(char* pathname) {
+    if (pathname == NULL) {
+        return -1; // Invalid input
     }
 
-    // If the provided pathname is "..", move up one level in the directory hierarchy.
-    if (strcmp(pathname, "..") == 0) {
-        // Find the last occurrence of '/' in the current "cwd" and remove it to go up one level.
-        char *lastSlash = strrchr(cwd, '/');
-        if (lastSlash != NULL) {
-            *lastSlash = '\0'; // Null-terminate the string at the last slash position.
-        }
-        return 0; // Successfully set the current working directory (moved up one level).
+    int parentParseResult = parsePath(0); // Parse the provided pathname
+
+    // Check if the directory exists and it is indeed a directory
+    if (parentParseResult == 0 || globalDirEntries[parentParseResult].isaDirectory == 0) {
+        return -1; // The provided pathname is invalid or not a directory
     }
 
-    // Otherwise, handle the case when a valid directory path is provided.
-    int dirIndex = parsePath(0); // Get the index of the directory entry in the file system.
+    // Copy the parsed pathname to the global cwd variable
+    strcpy(cwd, pathname);
 
-    if (dirIndex == -1) {
-        // Directory not found, so we can't set the current working directory to it.
-        return -1;
+    // Append a trailing slash to the cwd if not already present
+    if (cwd[strlen(cwd) - 1] != '/') {
+        strcpy(cwd + strlen(cwd), "/");
     }
 
-    // If the directory is found, we can set the current working directory to it.
-    // First, reset the "cwd" variable to the root directory.
-    strcpy(cwd, "/");
-
-    // Now, reconstruct the path to the directory from the root to the given directory.
-    for (int i = 1; i <= arrayCount; i++) {
-        if (i == 1 && strcmp(tokenArray[i], "/") == 0) {
-            // Skip the first token if it is a slash (root directory).
-            continue;
-        }
-        strcat(cwd, tokenArray[i]);
-        strcat(cwd, "/"); // Append a slash to separate directories.
-    }
-
-    return 0; // Successfully set the current working directory.
+    return 0; 
 }
 
