@@ -25,13 +25,16 @@
 
 extern struct DirectoryEntry *globalDirEntries;
 
-
+// // Directory iteration functions
+// struct fs_diriteminfo *fs_readdir(fdDir *dirp);
+// int fs_closedir(fdDir *dirp);
 
 // Parsepath code begins ---->
 
 // Current temporary use value, need change, or set, later
 char cwd[100] = "./../";
 
+struct fdDir* dir = NULL;
 
 char tmpcwd[100]; // For testing use
 char tokenArray[20][100]; // 20 is temporary count of string tokens, 100 characters in each
@@ -124,6 +127,97 @@ int parsePath(int parentParse){ //return int instead void, return i value thats 
     }
     
 }
+
+void set_cwd(char* path) {
+    strcpy(cwd, path);
+}
+
+void set_tmpcwd(char* path) {
+    strcpy(tmpcwd, path);
+}
+
+// Helper function to reset cwd 
+void resetCWD() { //comment code and uncomment for debugging
+    //printf("\nBEFORE:\nTMPCWD: %s\nCWD%s", tmpcwd, cwd); //debugging
+    strcpy(tmpcwd,  "\0");
+    strcpy(cwd,  "\0");
+    //printf("\nAfter:\nTMPCWD: %s\nCWD%s", tmpcwd, cwd); //debugging
+}
+
+// <------ Parsepath code ends
+
+// open, read, close dir begins here ------->
+
+fdDir *fs_opendir(const char *pathname)
+{
+    // fdDir dir; // Store in global?
+
+    // call parsePath and return index to the path
+    int currentFD = parsePath(0);
+    // set cwd if necessary
+
+    if (dir == NULL)
+    {
+        printf("Error memory allocate directory to store.\n");
+    }
+
+    // Need rework for logic figuring out if parsepath is valid or not
+    if (currentFD > 1)
+    {
+        printf("Directory to be opened is valid.\n");
+    }
+    else 
+    {
+        printf("Directory to be opened is invalid.\n");
+        return 0;
+    }
+
+    // Malloc structure to store directory
+    dir = malloc(sizeof(fdDir));
+    
+    dir->d_reclen = globalDirEntries[currentFD].fileSize;
+    dir->dirEntryPosition = currentFD;
+    dir->directory = globalDirEntries[currentFD];
+    //struct fs_diriteminfo * di;		/* Pointer to the structure you return from read */
+
+    return dir;
+    }
+
+struct fs_diriteminfo *fs_readdir(fdDir * dirp)
+{
+    struct fs_diriteminfo* result = NULL;
+
+
+    // check if the arg is valid
+    if (dirp == NULL)
+    {
+        printf("The directory in dirp is invalid.\n");
+        return NULL;
+    }
+    
+    result->d_reclen = globalDirEntries[dirp->dirEntryPosition].fileSize;
+    // set the fileType. It could either be a dir or a file.
+    result->fileType = globalDirEntries[dirp->dirEntryPosition].isaDirectory;
+    // set the name of the directoryItem
+    strcpy(result->d_name, globalDirEntries[dirp->dirEntryPosition].fileName);
+    
+    return result;
+}
+
+int fs_closedir(fdDir * dirp)
+{
+    // free(dirp->directory);
+    // dirp->directory = NULL;
+
+    // free the dirp instance
+    // free(dirp);
+    return 1;
+}
+
+
+// <--------- open, read, close dir code ends here
+
+
 
 int fs_stat( const char *path, struct fs_stat *buf)
 {
@@ -261,48 +355,61 @@ printf("Directory '%s' created successfully.\n", pathname);
 
 
 char * fs_getcwd(char *pathname, size_t size) {
-    
     // Check if the provided buffer is valid
     if (pathname == NULL || size == 0) {
         printf("Invalid buffer.\n");
         return NULL;
     }
-
+    // Copy the current working directory to the provided buffer
+  
     if (strlen(cwd) >= size) {
         printf("Buffer size too small to hold the current working directory.\n");
         return NULL;
     }
 
-    // Copy the current working directory to the provided buffer
-
-    strncpy(pathname, cwd, size-1);
-
-    pathname[size - 1] = '\0'; // Ensure the buffer is null-terminated
+    strncpy(pathname, cwd, size);
+    // pathname[size - 1] = '\0'; // Ensure the buffer is null-terminated
 
     return pathname;
 }
 
-// Function to set the current working directory
-int fs_setcwd(char* pathname) {
-    if (pathname == NULL) {
-        return -1; // Invalid input
+int fs_setcwd(char *pathname) {
+    // If the provided pathname is ".", no need to change the current working directory.
+    if (strcmp(pathname, ".") == 0) {
+        return 0; // Successfully set the current working directory (no change).
     }
 
-    int parentParseResult = parsePath(0); // Parse the provided pathname
-
-    // Check if the directory exists and it is indeed a directory
-    if (parentParseResult == 0 || globalDirEntries[parentParseResult].isaDirectory == 0) {
-        return -1; // The provided pathname is invalid or not a directory
+    // If the provided pathname is "..", move up one level in the directory hierarchy.
+    if (strcmp(pathname, "..") == 0) {
+        // Find the last occurrence of '/' in the current "cwd" and remove it to go up one level.
+        char *lastSlash = strrchr(cwd, '/');
+        if (lastSlash != NULL) {
+            *lastSlash = '\0'; // Null-terminate the string at the last slash position.
+        }
+        return 0; // Successfully set the current working directory (moved up one level).
     }
 
-    // Copy the parsed pathname to the global cwd variable
-    strcpy(cwd, pathname);
+    // Otherwise, handle the case when a valid directory path is provided.
+    int dirIndex = parsePath(0); // Get the index of the directory entry in the file system.
 
-    // Append a trailing slash to the cwd if not already present
-    if (cwd[strlen(cwd) - 1] != '/') {
-        strcpy(cwd + strlen(cwd), "/");
+    if (dirIndex == -1) {
+        // Directory not found, so we can't set the current working directory to it.
+        return -1;
     }
 
-    return 0; 
+    // If the directory is found, we can set the current working directory to it.
+    // First, reset the "cwd" variable to the root directory.
+    strcpy(cwd, "/");
+
+    // Now, reconstruct the path to the directory from the root to the given directory.
+    for (int i = 1; i <= arrayCount; i++) {
+        if (i == 1 && strcmp(tokenArray[i], "/") == 0) {
+            // Skip the first token if it is a slash (root directory).
+            continue;
+        }
+        strcat(cwd, tokenArray[i]);
+        strcat(cwd, "/"); // Append a slash to separate directories.
+    }
+
+    return 0; // Successfully set the current working directory.
 }
-
