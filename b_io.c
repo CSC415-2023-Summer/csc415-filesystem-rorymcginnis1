@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "b_io.h"
+#include "fsInit.h"
 
 #define MAXFCBS 20
 #define B_CHUNK_SIZE 512
@@ -30,6 +31,7 @@ typedef struct b_fcb
 	char * buf;		//holds the open file buffer
 	int index;		//holds the current position in the buffer
 	int buflen;		//holds how many valid bytes are in the buffer
+	DirectoryEntry* fi;
 	} b_fcb;
 	
 b_fcb fcbArray[MAXFCBS];
@@ -53,7 +55,7 @@ b_io_fd b_getFCB ()
 	{
 	for (int i = 0; i < MAXFCBS; i++)
 		{
-		if (fcbArray[i].buff == NULL)
+		if (fcbArray[i].buf == NULL)
 			{
 			return i;		//Not thread safe (But do not worry about it for this assignment)
 			}
@@ -99,19 +101,65 @@ int b_seek (b_io_fd fd, off_t offset, int whence)
 
 
 // Interface to write function	
-int b_write (b_io_fd fd, char * buffer, int count)
-	{
-	if (startup == 0) b_init();  //Initialize our system
+// Interface to write data to the file
+int b_write(b_io_fd fd, char* buffer, int count)
+{
+    if (startup == 0)
+        b_init(); // Initialize our system
 
-	// check that fd is between 0 and (MAXFCBS-1)
-	if ((fd < 0) || (fd >= MAXFCBS))
-		{
-		return (-1); 					//invalid file descriptor
-		}
-		
-		
-	return (0); //Change this
-	}
+    // Check that fd is between 0 and (MAXFCBS-1)
+    if ((fd < 0) || (fd >= MAXFCBS))
+    {
+        return -1; // Invalid file descriptor
+    }
+
+  
+    int space_available = B_CHUNK_SIZE - fcbArray[fd].index % B_CHUNK_SIZE;
+	// calc the remaining space in the cur block (disk block size)^^^
+    // calc the number of bytes to write in the current blockvvvv
+    int bytes_to_write_in_block = (count < space_available) ? count : space_available;
+    // calc the disk block number to write tovvv
+    int block_number = fcbArray[fd].index / B_CHUNK_SIZE;
+
+    // write data to the disk directly 
+    LBAwrite(fd, buffer, block_number, bytes_to_write_in_block);
+    // Update the file pointer/index
+    fcbArray[fd].index += bytes_to_write_in_block;
+
+    // update #of bytes left to wrtie
+    count -= bytes_to_write_in_block;
+    // write remaining into blocks loop
+    while (count > 0)
+    {
+        // if more to write bytes> current remaining block bytes remaining
+        if (count >= B_CHUNK_SIZE)
+        {
+            // calc the disk block number to write to
+            block_number = fcbArray[fd].index / B_CHUNK_SIZE;
+            // Write a full block to disk using 'LBAwrite'
+            LBAwrite(fd, buffer + fcbArray[fd].index, block_number, B_CHUNK_SIZE);
+            // update file pointer/index 
+            fcbArray[fd].index += B_CHUNK_SIZE;
+            // updates #bytes left to write
+            count -= B_CHUNK_SIZE;
+        }
+        else
+        {
+            // calc the disk block number to write to
+            block_number = fcbArray[fd].index / B_CHUNK_SIZE;
+            //write remaining bbytes to block
+            LBAwrite(fd, buffer + fcbArray[fd].index, block_number, count);
+            // update the file pointer/index
+            fcbArray[fd].index += count;
+
+            // presumably all bytes written
+            count = 0;
+        }
+    }
+
+    // Return the total number of bytes successfully written to the file
+    return fcbArray[fd].index;
+}
 
 
 
