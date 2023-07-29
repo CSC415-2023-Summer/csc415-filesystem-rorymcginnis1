@@ -26,9 +26,9 @@
 #define FT_LINK	DT_LNK
 
 // May need this later
-// #ifndef blksize_t
-// typedef int blksize_t;
-// #endif
+#ifndef blksize_t
+typedef int blksize_t;
+#endif
 
 #ifndef blkcnt_t
 typedef long blkcnt_t;

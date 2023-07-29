@@ -60,14 +60,14 @@ int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent)
 		strcpy(newD[i].fileName, "");
 		newD[i].fileSize= 0;
 		newD[i].fileLocation=-1;
-		newD[i].dateCreated=NULL;
-		newD[i].dateAccessed=NULL;
-		newD[i].dateModified=NULL;
+		newD[i].dateCreated=0;
+		newD[i].dateAccessed=0;//changed nullls to 0^^vv
+		newD[i].dateModified=0;
 		newD[i].isaDirectory=0;
 	}
 	//put data into the first directory . (self)
 	strcpy(newD[0].fileName, ".");
-	newD[0].fileSize= actualEnteries * (bytesToAllocate);
+	newD[0].fileSize= actualEnteries * sizeof(DirectoryEntry);//changed this
 	//allocate the blocks from extent.c
 	extent * e = allocateBlocks(numBlocks, numBlocks);
 	if(e ==NULL)
@@ -117,7 +117,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	/* TODO: Add any code you need to initialize your file system. */
 
 	struct VolumeControlBlock * vcbPointer;
-	vcbPointer = malloc(MINBLOCKSIZE);
+	vcbPointer = malloc(blockSize);
 	//catch case
 	if (vcbPointer == NULL ){
 		printf("NULL");

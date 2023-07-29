@@ -15,7 +15,7 @@
 **************************************************************/
 
 #include "extents.h"
-#include "b_io.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "fsLow.h"
@@ -34,6 +34,12 @@ int extentsCount = 1;//counter for extents
 int initFreeSpace() {
 
     extents = (extent*)calloc(320,sizeof(extent));
+
+    // chk if aloocation ws a success
+    if (extents == NULL) {
+        printf("Failed to allocate memory for extents in initFreeSpace().\n");
+        return -1;
+    }
 
     extents[0].start = 6;  // Starting from block 6 as per requirements
     extents[0].count = blockCount -6;
@@ -87,6 +93,13 @@ extent* allocateBlocks(int required, int minPerExtent) {
     }
     
     extent* result = (extent*)calloc(required, sizeof(extent));
+
+    // if alocation successful
+    if (result == NULL) {
+        printf("Failed to allocate memory for results in allocateBlocks().\n");
+        return NULL;
+    }
+
     //arroary allocation
     int i = 0;  //iterate thru extents
     int extentCount = 0;// number of extents currently

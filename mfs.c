@@ -18,6 +18,7 @@
 **************************************************************/
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "mfs.h"
 #include "b_io.h"
 #include "fsInit.h"
@@ -155,7 +156,7 @@ fdDir *fs_opendir(const char *pathname)
     // call parsePath and return index to the path
     int currentFD = parsePath(0);
     // set cwd if necessary
-
+    dir = (fdDir *)malloc(sizeof(fdDir));
     if (dir == NULL)
     {
         printf("Error memory allocate directory to store.\n");
@@ -173,7 +174,7 @@ fdDir *fs_opendir(const char *pathname)
     }
 
     // Malloc structure to store directory
-    dir = malloc(sizeof(fdDir));
+    
     
     dir->d_reclen = globalDirEntries[currentFD].fileSize;
     dir->dirEntryPosition = currentFD;
@@ -249,9 +250,9 @@ int fs_delete(char* filename)
     			globalDirEntries[i].fileLocation = -1;
     			globalDirEntries[i].isaDirectory = 1;
     			time_t currentTime = time(NULL);
-    			globalDirEntries[i].dateCreated = NULL;
-    			globalDirEntries[i].dateAccessed = NULL;
-  			globalDirEntries[i].dateModified = NULL;
+    			globalDirEntries[i].dateCreated = 0;
+    			globalDirEntries[i].dateAccessed = 0;
+  			globalDirEntries[i].dateModified = 0;
 			printf("File '%s' removed successfully.\n", filename);
 			return 0;
 			
@@ -275,9 +276,9 @@ int fs_rmdir(const char *pathname){
     				globalDirEntries[i].fileLocation = -1;
     				globalDirEntries[i].isaDirectory = 1;
     				time_t currentTime = time(NULL);
-    				globalDirEntries[i].dateCreated = NULL;
-    				globalDirEntries[i].dateAccessed = NULL;
-  				globalDirEntries[i].dateModified = NULL;
+    				globalDirEntries[i].dateCreated = 0;
+    				globalDirEntries[i].dateAccessed = 0;
+  				globalDirEntries[i].dateModified = 0;
 				printf("Directory '%s' removed successfully.\n", pathname);
 				return 0;
 			}
