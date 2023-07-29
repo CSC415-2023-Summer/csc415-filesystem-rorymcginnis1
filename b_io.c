@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include "b_io.h"
 #include "fsInit.h"
+#include "fsLow.h"
 
 #define MAXFCBS 20
 #define B_CHUNK_SIZE 512
@@ -122,7 +123,7 @@ int b_write(b_io_fd fd, char* buffer, int count)
     int block_number = fcbArray[fd].index / B_CHUNK_SIZE;
 
     // write data to the disk directly 
-    LBAwrite(fd, buffer, block_number, bytes_to_write_in_block);
+    LBAwrite(buffer + fcbArray[fd].index, block_number, bytes_to_write_in_block);
     // Update the file pointer/index
     fcbArray[fd].index += bytes_to_write_in_block;
 
@@ -137,7 +138,7 @@ int b_write(b_io_fd fd, char* buffer, int count)
             // calc the disk block number to write to
             block_number = fcbArray[fd].index / B_CHUNK_SIZE;
             // Write a full block to disk using 'LBAwrite'
-            LBAwrite(fd, buffer + fcbArray[fd].index, block_number, B_CHUNK_SIZE);
+            LBAwrite(buffer + fcbArray[fd].index, B_CHUNK_SIZE, block_number);
             // update file pointer/index 
             fcbArray[fd].index += B_CHUNK_SIZE;
             // updates #bytes left to write
@@ -148,7 +149,7 @@ int b_write(b_io_fd fd, char* buffer, int count)
             // calc the disk block number to write to
             block_number = fcbArray[fd].index / B_CHUNK_SIZE;
             //write remaining bbytes to block
-            LBAwrite(fd, buffer + fcbArray[fd].index, block_number, count);
+            LBAwrite(buffer + fcbArray[fd].index, count, block_number);
             // update the file pointer/index
             fcbArray[fd].index += count;
 
