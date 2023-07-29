@@ -32,7 +32,9 @@ typedef struct b_fcb
 	char * buf;		//holds the open file buffer
 	int index;		//holds the current position in the buffer
 	int buflen;		//holds how many valid bytes are in the buffer
+	int currentBlk;
 	DirectoryEntry* fi;
+	int numBlocks;
 	} b_fcb;
 	
 b_fcb fcbArray[MAXFCBS];
@@ -69,18 +71,24 @@ b_io_fd b_getFCB ()
 // O_RDONLY, O_WRONLY, or O_RDWR
 b_io_fd b_open (char * filename, int flags)
 	{
-	b_io_fd returnFd;
-
-	//*** TODO ***:  Modify to save or set any information needed
-	//
-	//
-		
-	if (startup == 0) b_init();  //Initialize our system
+	b_io_fd fd;
 	
-	returnFd = b_getFCB();				// get our own file descriptor
+	if(startup ==0)
+		b_init();
+		
+
+	fd=b_getFCB();
+	fcbArray[fd].buf = malloc(B_CHUNK_SIZE);
+	fcbArray[fd].index = 0;
+	fcbArray[fd].buflen=0;
+	fcbArray[fd].currentBlk=0;
+	fcbArray[fd].numBlocks=(fcbArray[fd].fi->fileSize+ (B_CHUNK_SIZE -1))/B_CHUNK_SIZE;
+	
+	
+				// get our own file descriptor
 										// check for error - all used FCB's
 	
-	return (returnFd);						// all set
+	return (fd);						// all set
 	}
 
 
@@ -119,7 +127,6 @@ int b_write(b_io_fd fd, char* buffer, int count)
 	// calc the remaining space in the cur block (disk block size)^^^
     // calc the number of bytes to write in the current blockvvvv
     int bytes_to_write_in_block = (count < space_available) ? count : space_available;
-    // calc the disk block number to write tovvv
     int block_number = fcbArray[fd].index / B_CHUNK_SIZE;
 
     // write data to the disk directly 
@@ -152,7 +159,7 @@ int b_write(b_io_fd fd, char* buffer, int count)
             LBAwrite(buffer + fcbArray[fd].index, count, block_number);
             // update the file pointer/index
             fcbArray[fd].index += count;
-
+            
             // presumably all bytes written
             count = 0;
         }
@@ -185,6 +192,12 @@ int b_write(b_io_fd fd, char* buffer, int count)
 //  +-------------+------------------------------------------------+--------+
 int b_read (b_io_fd fd, char * buffer, int count)
 	{
+	
+	int part1;
+	int part2;
+	int part3;
+	int numberOfBlocks;
+	int bytesRead;
 
 	if (startup == 0) b_init();  //Initialize our system
 
@@ -193,12 +206,86 @@ int b_read (b_io_fd fd, char * buffer, int count)
 		{
 		return (-1); 					//invalid file descriptor
 		}
+	
+	int remainingBytes = fcbArray[fd].buflen - fcbArray[fd].index;
+	
+	int amountDelivered = (fcbArray[fd].currentBlk * B_CHUNK_SIZE)- remainingBytes;
+	
+	if ((count + amountDelivered) > fcbArray[fd].fi->fileSize)
+	{
+		count = fcbArray[fd].fi-> fileSize - amountDelivered;
+	}
+	
+	if (remainingBytes >=count){
+		part1 = count;
+		part2 = 0;
+		part3 = 0;
+	}
+	
+	else{
+		part1 = remainingBytes;
 		
+		part3 = count - remainingBytes;
+		
+		numberOfBlocks = part3 / B_CHUNK_SIZE;
+		
+		part2 = numberOfBlocks * B_CHUNK_SIZE;
+		
+		part3 = part3 - part2;
+	}
+	
+	if(part1>0){
+		memcpy(buffer,fcbArray[fd].buf + fcbArray[fd].index, part1);
+		fcbArray[fd].index = fcbArray[fd].index + part1;
+	}
+	
+	if(part2 > 0){
+		bytesRead = LBAread (buffer+ part1, numberOfBlocks, fcbArray[fd].currentBlk + fcbArray[fd].fi->fileLocation);
+		fcbArray[fd].currentBlk += numberOfBlocks;
+		
+		part2 = bytesRead * B_CHUNK_SIZE;
+	
+	}
+	if(part3 >0)
+{
+		bytesRead = LBAread(fcbArray[fd].buf , 1, fcbArray[fd].currentBlk + fcbArray[fd].fi->fileLocation);
+		
+	bytesRead = bytesRead * B_CHUNK_SIZE;
+	
+	fcbArray[fd].currentBlk +=1;
+	
+	fcbArray[fd].index = 0;
+	
+	fcbArray[fd].buflen = bytesRead;
+	
+	if(bytesRead < part3)
+		part3 = bytesRead;
+	
+	if (part3>0){
+		memcpy(buffer+part1+part2, fcbArray[fd].buf + fcbArray[fd].index, part3);
+		fcbArray[fd].index = fcbArray[fd].index + part3;
+	}
+	return(part1 + part2 + part3);
+
+
+}
+	
+	
+	
 	return (0);	//Change this
 	}
 	
 // Interface to Close the file	
 int b_close (b_io_fd fd)
 	{
+	if ((fd<0) || (fd >= MAXFCBS))
+		return -1;
+	if (fcbArray[fd].fi ==NULL)
+		return -1;
+	if (fcbArray[fd].buf != NULL)
+		free (fcbArray[fd].buf);
+	fcbArray[fd].buf = NULL;
+	fcbArray[fd].fi = NULL;
+	return 0;
 
 	}
