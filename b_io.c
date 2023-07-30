@@ -82,7 +82,14 @@ b_io_fd b_open (char * filename, int flags)
 	fcbArray[fd].index = 0;
 	fcbArray[fd].buflen=0;
 	fcbArray[fd].currentBlk=0;
-	fcbArray[fd].numBlocks=(fcbArray[fd].fi->fileSize+ (B_CHUNK_SIZE -1))/B_CHUNK_SIZE;
+	fcbArray[fd].numBlocks=(globalDirEntries->fileSize+ (B_CHUNK_SIZE -1))/B_CHUNK_SIZE;
+	
+	if (flags){
+		strcpy(globalDirEntries->fileName, filename);
+		globalDirEntries->fileLocation = -1;
+		globalDirEntries-> fileSize=0;
+		globalDirEntries->isaDirectory=0;
+	}
 	
 	
 				// get our own file descriptor
