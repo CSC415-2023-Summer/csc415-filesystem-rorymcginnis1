@@ -60,7 +60,7 @@ b_io_fd b_getFCB ()
 		{
 		if (fcbArray[i].buf == NULL)
 			{
-			return i;		//Not thread safe (But do not worry about it for this assignment)
+			return i; //Not thread safe (But do not worry about it for this assignment)
 			}
 		}
 	return (-1);  //all in use
@@ -93,23 +93,57 @@ b_io_fd b_open (char * filename, int flags)
 
 
 // Interface to seek function	
-int b_seek (b_io_fd fd, off_t offset, int whence)
-	{
-	if (startup == 0) b_init();  //Initialize our system
+int b_seek(b_io_fd fd, off_t offset, int whence)
+{
+    if (startup == 0)
+        b_init(); // Initialize our system
 
-	// check that fd is between 0 and (MAXFCBS-1)
-	if ((fd < 0) || (fd >= MAXFCBS))
-		{
-		return (-1); 					//invalid file descriptor
-		}
-		
-		
-	return (0); //Change this
-	}
+    // check that fd is between 0 and (MAXFCBS-1)
+    if ((fd < 0) || (fd >= MAXFCBS))
+    {
+        return -1; // Invalid file descriptor
+    }
+
+    switch (whence)
+    {
+    case SEEK_SET:
+        if (offset < 0 || offset > fcbArray[fd].fi->fileSize)
+        {
+            // Offset goes beyond the file boundaries
+            return -1;
+        }
+        fcbArray[fd].index = offset;
+        break;
+
+    case SEEK_CUR:
+        if (fcbArray[fd].index + offset < 0 || fcbArray[fd].index + offset > fcbArray[fd].fi->fileSize)
+        {
+            // Offset goes beyond the file boundaries
+            return -1;
+        }
+        fcbArray[fd].index += offset;
+        break;
+
+    case SEEK_END:
+        if (offset > 0 || fcbArray[fd].fi->fileSize + offset < 0)
+        {
+            // Offset goes beyond the file boundaries
+            return -1;
+        }
+        fcbArray[fd].index = fcbArray[fd].fi->fileSize + offset;
+        break;
+
+    default:
+        // Invalid value for 'whence'
+        return -1;
+    }
+
+    return fcbArray[fd].index;
+}
 
 
 
-// Interface to write function	
+// Interface to write a function	
 // Interface to write data to the file
 int b_write(b_io_fd fd, char* buffer, int count)
 {
@@ -125,16 +159,16 @@ int b_write(b_io_fd fd, char* buffer, int count)
   
     int space_available = B_CHUNK_SIZE - fcbArray[fd].index % B_CHUNK_SIZE;
 	// calc the remaining space in the cur block (disk block size)^^^
-    // calc the number of bytes to write in the current blockvvvv
-    int bytes_to_write_in_block = (count < space_available) ? count : space_available;
+    // calc the number of bytes to write in the current block
+    int bytes_to_write_in_block = (count < space_available) ? count: space_available;
     int block_number = fcbArray[fd].index / B_CHUNK_SIZE;
 
-    // write data to the disk directly 
+    //Write data to the disk directly 
     LBAwrite(buffer + fcbArray[fd].index, block_number, bytes_to_write_in_block);
     // Update the file pointer/index
     fcbArray[fd].index += bytes_to_write_in_block;
 
-    // update #of bytes left to wrtie
+    // update #of bytes left to write
     count -= bytes_to_write_in_block;
     // write remaining into blocks loop
     while (count > 0)
@@ -274,56 +308,6 @@ int b_read (b_io_fd fd, char * buffer, int count)
 	
 	return (0);	//Change this
 	}
-
-
-// Interface to seek function	
-int b_seek(b_io_fd fd, off_t offset, int whence)
-{
-    if (startup == 0)
-        b_init(); // Initialize our system
-
-    // check that fd is between 0 and (MAXFCBS-1)
-    if ((fd < 0) || (fd >= MAXFCBS))
-    {
-        return -1; // Invalid file descriptor
-    }
-
-    switch (whence)
-    {
-    case SEEK_SET:
-        if (offset < 0 || offset > fcbArray[fd].fi->fileSize)
-        {
-            // Offset goes beyond the file boundaries
-            return -1;
-        }
-        fcbArray[fd].index = offset;
-        break;
-
-    case SEEK_CUR:
-        if (fcbArray[fd].index + offset < 0 || fcbArray[fd].index + offset > fcbArray[fd].fi->fileSize)
-        {
-            // Offset goes beyond the file boundaries
-            return -1;
-        }
-        fcbArray[fd].index += offset;
-        break;
-
-    case SEEK_END:
-        if (offset > 0 || fcbArray[fd].fi->fileSize + offset < 0)
-        {
-            // Offset goes beyond the file boundaries
-            return -1;
-        }
-        fcbArray[fd].index = fcbArray[fd].fi->fileSize + offset;
-        break;
-
-    default:
-        // Invalid value for 'whence'
-        return -1;
-    }
-
-    return fcbArray[fd].index;
-}
 
 	
 // // Interface to Close the file	
