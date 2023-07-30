@@ -186,13 +186,35 @@ fdDir *fs_opendir(const char *pathname)
 
 struct fs_diriteminfo *fs_readdir(fdDir * dirp)
 {
-    struct fs_diriteminfo* result = NULL;
+    // struct fs_diriteminfo* result = NULL;
 
 
     // check if the arg is valid
     if (dirp == NULL)
     {
         printf("The directory in dirp is invalid.\n");
+        return NULL;
+    }
+
+     // chk if cur pos in dir is valid
+    if (dirp->dirEntryPosition < 0 || dirp->dirEntryPosition >= NUM_DIRECT_ENTRIES)
+    {
+        printf("Invalid position in the directory.\n");
+        return NULL;
+    }
+
+    // alloc memory for pointer of result 
+    struct fs_diriteminfo *result = (struct fs_diriteminfo *)malloc(sizeof(struct fs_diriteminfo));
+    if (result == NULL)
+    {
+        printf("Memory allocation error for result pointer.\n");
+        return NULL;
+    }
+
+    // chk if cur pos points to last entry
+    if (dirp->dirEntryPosition == NUM_DIRECT_ENTRIES - 1)
+    {
+        free(result);
         return NULL;
     }
     
@@ -202,16 +224,23 @@ struct fs_diriteminfo *fs_readdir(fdDir * dirp)
     // set the name of the directoryItem
     strcpy(result->d_name, globalDirEntries[dirp->dirEntryPosition].fileName);
     
+  // move to nxt dir entry
+    dirp->dirEntryPosition++;
+
     return result;
 }
 
 int fs_closedir(fdDir * dirp)
 {
-    // free(dirp->directory);
+    if (dirp == NULL) {
+        // invalid dir
+        return -1;
+    }
     // dirp->directory = NULL;
 
-    // free the dirp instance
-    // free(dirp);
+    // free dir itself
+    free(dirp);
+    
     return 1;
 }
 
@@ -222,23 +251,22 @@ int fs_closedir(fdDir * dirp)
 
 int fs_stat( const char *path, struct fs_stat *buf)
 {
+    for (int i = 0; i < NUM_DIRECT_ENTRIES; i++)
+    {
+        if (strcmp(path, globalDirEntries[i].fileName) == 0)
+        {
+            buf->st_size = globalDirEntries[i].fileSize;
+            buf->st_blksize = BLOCK_SIZE;
+            buf->st_blocks = (globalDirEntries[i].fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE;
+            buf->st_accesstime = globalDirEntries[i].dateAccessed;
+            buf->st_modtime = globalDirEntries[i].dateModified;
+            buf->st_createtime = globalDirEntries[i].dateCreated;
 
-	for (int i=0; i< NUM_DIRECT_ENTRIES; i++){
-		if(strcmp(path, globalDirEntries[i].fileName)==0){
-			buf ->st_size = globalDirEntries[i].fileSize;
-			buf-> st_blksize = BLOCK_SIZE;
-			buf-> st_blocks = (globalDirEntries[i].fileSize + BLOCK_SIZE -1)/BLOCK_SIZE;
-			buf-> st_accesstime = globalDirEntries[i].dateAccessed;
-			buf->st_modtime =globalDirEntries[i].dateModified;
-			buf->st_createtime = globalDirEntries[i].dateCreated;
-			
-			return 0;
-		
-		}
-		return -1;
-	
-	}
+            return 0;
+        }
+    }
 
+    return -1; // File not found
 }
 
 int fs_delete(char* filename)
