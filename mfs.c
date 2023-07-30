@@ -345,6 +345,7 @@ int fs_mkdir(const char *pathname, mode_t mode) {
     for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
         // filename matches pathname?
         if (strcmp(globalDirEntries[i].fileName, pathname) == 0) {
+            printf("Directory '%s' already exists.\n", pathname);
             return -1; // Return -1 as the directory already exists
         }
     }
