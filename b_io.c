@@ -274,18 +274,112 @@ int b_read (b_io_fd fd, char * buffer, int count)
 	
 	return (0);	//Change this
 	}
-	
-// Interface to Close the file	
-int b_close (b_io_fd fd)
-	{
-	if ((fd<0) || (fd >= MAXFCBS))
-		return -1;
-	if (fcbArray[fd].fi ==NULL)
-		return -1;
-	if (fcbArray[fd].buf != NULL)
-		free (fcbArray[fd].buf);
-	fcbArray[fd].buf = NULL;
-	fcbArray[fd].fi = NULL;
-	return 0;
 
+
+// Interface to seek function	
+int b_seek(b_io_fd fd, off_t offset, int whence)
+{
+    if (startup == 0)
+        b_init(); // Initialize our system
+
+    // check that fd is between 0 and (MAXFCBS-1)
+    if ((fd < 0) || (fd >= MAXFCBS))
+    {
+        return -1; // Invalid file descriptor
+    }
+
+    switch (whence)
+    {
+    case SEEK_SET:
+        if (offset < 0 || offset > fcbArray[fd].fi->fileSize)
+        {
+            // Offset goes beyond the file boundaries
+            return -1;
+        }
+        fcbArray[fd].index = offset;
+        break;
+
+    case SEEK_CUR:
+        if (fcbArray[fd].index + offset < 0 || fcbArray[fd].index + offset > fcbArray[fd].fi->fileSize)
+        {
+            // Offset goes beyond the file boundaries
+            return -1;
+        }
+        fcbArray[fd].index += offset;
+        break;
+
+    case SEEK_END:
+        if (offset > 0 || fcbArray[fd].fi->fileSize + offset < 0)
+        {
+            // Offset goes beyond the file boundaries
+            return -1;
+        }
+        fcbArray[fd].index = fcbArray[fd].fi->fileSize + offset;
+        break;
+
+    default:
+        // Invalid value for 'whence'
+        return -1;
+    }
+
+    return fcbArray[fd].index;
+}
+
+	
+// // Interface to Close the file	
+// int b_close (b_io_fd fd)
+// 	{
+// 	if ((fd<0) || (fd >= MAXFCBS))
+// 		return -1;
+// 	if (fcbArray[fd].fi ==NULL)
+// 		return -1;
+// 	if (fcbArray[fd].buf != NULL)
+// 		free (fcbArray[fd].buf);
+// 	fcbArray[fd].buf = NULL;
+// 	fcbArray[fd].fi = NULL;
+// 	return 0;
+
+// 	}
+
+
+// Interface to Close the file	
+int b_close(b_io_fd fd)
+{
+	if (startup == 0){
+        b_init(); // Initialize our system
 	}
+
+    //Check that fd is between 0 and (MAXFCBS-1)
+    if (fd < 0 || fd >= MAXFCBS)
+    {
+        return -1; // Invalid file descriptor
+    }
+
+    // Flush any remaining data in the buffer to the file
+    if (fcbArray[fd].buflen > 0)
+    {
+        LBAwrite(fd, fcbArray[fd].buf, fcbArray[fd].buflen);
+    }
+
+	 // and check that the specified FCB is actually in use
+    if (fcbArray[fd].buf == NULL) { // File not open for this descriptor
+        return -1;
+    }
+
+    // Check if the file buffer is allocated
+    if (fcbArray[fd].buf != NULL) {
+        free(fcbArray[fd].buf); // Free the buffer if allocated
+        fcbArray[fd].buf = NULL; // Set buffer to NULL to indicate deallocation
+    }
+    // Free the buffer associated with the FCB
+    free(fcbArray[fd].buf);
+    fcbArray[fd].buf = NULL;
+    fcbArray[fd].index = 0;
+    fcbArray[fd].buflen = 0;
+
+    return 0; // File closed successfully
+}
+
+
+
+
