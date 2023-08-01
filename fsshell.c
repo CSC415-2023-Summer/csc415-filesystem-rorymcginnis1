@@ -1,17 +1,16 @@
 /**************************************************************
-* Class:  CSC-415-0# - Summer 2023
-* Names: 
-* Student IDs:
-* GitHub Name:
-* Group Name:
+* Class:  CSC-415-1 Summer 2023
+* Names: Kaung Nay Htet, Himal Shrestha, Rory McGinnis,  James Donnelly
+* Student IDs:922292784, 922399514, 921337245, 917703805
+* GitHub Name: rorymcginnis1
+* Group Name: Team Drivers
 * Project: Basic File System
 *
 * File: fsShell.c
 *
 * Description: Main driver for file system assignment.
-*
-* Make sure to set the #defined on the CMDxxxx_ON from 0 to 1 
-* when you are ready to test that feature
+*	       Make sure to set the #defined on the CMDxxxx_ON from 0 to 1 
+*              when you are ready to test that feature
 *
 **************************************************************/
 
