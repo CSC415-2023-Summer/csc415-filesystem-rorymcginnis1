@@ -22,6 +22,7 @@
 #include "b_io.h"
 #include "fsInit.h"
 #include "fsLow.h"
+#include <time.h>
 
 #define MAXFCBS 20
 #define B_CHUNK_SIZE 512
@@ -91,7 +92,7 @@ b_io_fd b_open(char *filename, int flags) {
     }
 
 
-    if ((flags !=O_RDONLY) && dirIndex == -1) {
+    if ((flags != O_RDONLY) && dirIndex == -1) {
         int newDirIndex = -1;
         for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
             if (globalDirEntries[i].fileName[0] == '\0') {
@@ -120,10 +121,9 @@ b_io_fd b_open(char *filename, int flags) {
     if (fd < 0) {
         return -1;
     }
-    
+
     char * buffer = (char*) malloc(B_CHUNK_SIZE * sizeof(char));
     if (buffer == NULL) {
-
         return -1;
     }
     fcbArray[fd].buf = buffer;
@@ -131,13 +131,10 @@ b_io_fd b_open(char *filename, int flags) {
     fcbArray[fd].index = 0;
     fcbArray[fd].buflen = 0;
     fcbArray[fd].currentBlk = 0;
-    fcbArray[fd].fi=globalDirEntries[dirIndex];
-
+    fcbArray[fd].fi = &globalDirEntries[dirIndex]; //  pointer to DirectoryEntry
 
     return fd;
-}
-
-// Interface to seek function	
+}// Interface to seek function	
 int b_seek(b_io_fd fd, off_t offset, int whence)
 {
     if (startup == 0)
