@@ -19,7 +19,6 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-
 #include "fsLow.h"
 #include "mfs.h"
 #include "extents.c"
@@ -27,35 +26,31 @@
 
 struct DirectoryEntry* globalDirEntries = NULL;
 
-
-//initalize the root directory
+//Initalize the root directory
 int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent)
 {
-	//get the total number of bytes and entries we need
+	//Set the total number of bytes and entries we need
 	int bytesNeeded =(sizeof(DirectoryEntry)*NUM_DIRECT_ENTRIES);
-	int numBlocks=(bytesNeeded +BLOCK_SIZE-1)/BLOCK_SIZE;
-	
+	int numBlocks=(bytesNeeded +BLOCK_SIZE-1)/BLOCK_SIZE;	
 	int bytesToAllocate =numBlocks*BLOCK_SIZE;
-	
 	int actualEnteries = bytesToAllocate/(sizeof(DirectoryEntry));
-	//account for an error
+	
+	//Validate in case of an error
 	if (actualEnteries< minEntreis){
 		return -1;
 	}
 	
+	// Allocate memory for entries to be stored
 	struct DirectoryEntry * newD =malloc(sizeof(DirectoryEntry)*actualEnteries);
 	time_t currentTime = time(NULL);
 
-	if(newD ==NULL)
-	{
-	
+	if(newD ==NULL)	{
 		return -1;
 	}
 
-	
 	globalDirEntries = newD;	
 	
-	//initalize the NewDirectory we created with empty data
+	//Initalize the NewDirectory created with default data
 	for (int i=0; i<actualEnteries; i++){
 		strcpy(newD[i].fileName, "");
 		newD[i].fileSize= 0;
@@ -65,23 +60,24 @@ int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent)
 		newD[i].dateModified=0;
 		newD[i].isaDirectory=0;
 	}
-	//put data into the first directory . (self)
+	
+	//Populate data for the directory "."
 	strcpy(newD[0].fileName, ".");
-	newD[0].fileSize= actualEnteries * sizeof(DirectoryEntry);//changed this
-	//allocate the blocks from extent.c
+	newD[0].fileSize= actualEnteries * sizeof(DirectoryEntry);
 	extent * e = allocateBlocks(numBlocks, numBlocks);
 	if(e ==NULL)
 	{
 		free(newD);
 		return -1;
 	}
-
 	newD[0].fileLocation = e->start;
 	newD[0].dateCreated=currentTime;
 	newD[0].dateAccessed=currentTime;
 	newD[0].dateModified=currentTime;
 	newD[0].isaDirectory=1;
 	free(e);
+	
+	//Populate data for the directory ".."
 	strcpy(newD[1].fileName,"..");
 	//if parent is null it is the root directory so parent will be itself
 	if(parent == NULL)
@@ -90,7 +86,6 @@ int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent)
 	
 	}
 	else
-	// put data into the second directory .. (parent)
 	{
 		newD[1].fileSize = parent[0].fileSize;
 		newD[1].fileLocation = parent[0].fileLocation;
@@ -99,32 +94,37 @@ int initialize_root_directory(int minEntreis, struct DirectoryEntry * parent)
 		newD[1].dateModified=currentTime;
 		newD[1].isaDirectory=1;	
 	}     
+
 	//release the blocks     
 	releaseBlocks(newD[1].fileLocation,numBlocks);
+	
 	//write to memory
 	LBAwrite(newD, numBlocks, newD[0].fileLocation);
+	
 	//return the location of the file
 	return (newD[0].fileLocation);
 
 	}
 
 
-//initalize the file system
+//	Initalize the file system
 int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	{
 
 	printf ("Initializing File System with %ld blocks with a block size of %ld\n", numberOfBlocks, blockSize);
 	/* TODO: Add any code you need to initialize your file system. */
 
+	// Create memory allocation for vcb
 	struct VolumeControlBlock * vcbPointer;
 	vcbPointer = malloc(blockSize);
-	//catch case
+
+	//Catch case in case pointer is invalid
 	if (vcbPointer == NULL ){
 		printf("NULL");
 		return -1;
 	}
 	
-	//initalize the freespace
+	//Initalize the freespace
 	int fs = initFreeSpace();
 	if(fs != 6)
 	{
@@ -132,22 +132,20 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	}
 	
 	int minEnt = 2;
-	
 	struct DirectoryEntry * root = malloc(sizeof(DirectoryEntry));
 	
 	//initalize the root directory
 	int rd = initialize_root_directory(minEnt, root);
 	
-	//rd returns the root directory
-	
-
+	// rd returns the root directory, and status check of whether
+	// created or not
 	if(rd < 0)
 	{
 		return -1;
 	}
 	serializeFreeSpaceMap();
 
-	//populate vcbPointer and write to the disk
+	//Populate vcbPointer and write to the disk
 	if (vcbPointer->signature != MAGICNUMBER)
 	{
 		vcbPointer->signature = MAGICNUMBER;
