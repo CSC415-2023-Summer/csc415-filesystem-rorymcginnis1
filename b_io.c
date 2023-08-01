@@ -70,41 +70,46 @@ b_io_fd b_getFCB ()
 // Interface to open a buffered file
 // Modification of interface for this assignment, flags match the Linux flags for open
 // O_RDONLY, O_WRONLY, or O_RDWR
+//open function
 b_io_fd b_open(char *filename, int flags) {
 
     if (startup == 0) {
         b_init();
     }
+// loops through directories to find if one already exists
     int dirIndex = -1;
     for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
         if (strcmp(globalDirEntries[i].fileName, filename) == 0) {
             dirIndex = i;
         }
     }
+// if cat and file does not exist
 
     if ((flags == O_RDONLY) && dirIndex == -1) {
         printf("File not found: %s\n", filename);
         return -1;
     }
+//if cat and is trying to cat a directory
     if ((flags == O_RDONLY) && globalDirEntries[dirIndex].isaDirectory == 1) {
         printf("cannot cat a directory\n");
         return -1;
     }
 
-
+//if not cat, so its touch
     if ((flags != O_RDONLY) && dirIndex == -1) {
         int newDirIndex = -1;
+	//loop through directories to find an empty directory to put the file
         for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
             if (globalDirEntries[i].fileName[0] == '\0') {
                 newDirIndex = i;
                 break;
             }
         }
-
+// if no free space for file return
         if (newDirIndex == -1) {
             return -1;
         }
-
+// put the information into globaldirEntries
         strncpy(globalDirEntries[newDirIndex].fileName, filename, strlen(filename));
         globalDirEntries[newDirIndex].fileSize = 0;
         globalDirEntries[newDirIndex].fileLocation = -1;
@@ -115,13 +120,13 @@ b_io_fd b_open(char *filename, int flags) {
         globalDirEntries[newDirIndex].dateAccessed = currentTime;
         globalDirEntries[newDirIndex].dateModified = currentTime;
     }
-
+// get the fd
     b_io_fd fd = b_getFCB();
 
     if (fd < 0) {
         return -1;
     }
-
+// set all the information needed for the fcbArray
     char * buffer = (char*) malloc(B_CHUNK_SIZE * sizeof(char));
     if (buffer == NULL) {
         return -1;
@@ -132,7 +137,7 @@ b_io_fd b_open(char *filename, int flags) {
     fcbArray[fd].buflen = 0;
     fcbArray[fd].currentBlk = 0;
     fcbArray[fd].fi = &globalDirEntries[dirIndex]; //  pointer to DirectoryEntry
-
+// return fd if there was no errors
     return fd;
 }// Interface to seek function	
 int b_seek(b_io_fd fd, off_t offset, int whence)
