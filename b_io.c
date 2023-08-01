@@ -69,35 +69,73 @@ b_io_fd b_getFCB ()
 // Interface to open a buffered file
 // Modification of interface for this assignment, flags match the Linux flags for open
 // O_RDONLY, O_WRONLY, or O_RDWR
-b_io_fd b_open (char * filename, int flags)
-	{
-	b_io_fd fd;
-	
-	if(startup ==0)
-		b_init();
-		
+b_io_fd b_open(char *filename, int flags) {
 
-	fd=b_getFCB();
-	fcbArray[fd].buf = malloc(B_CHUNK_SIZE);
-	fcbArray[fd].index = 0;
-	fcbArray[fd].buflen=0;
-	fcbArray[fd].currentBlk=0;
-	fcbArray[fd].numBlocks=(globalDirEntries->fileSize+ (B_CHUNK_SIZE -1))/B_CHUNK_SIZE;
-	
-	if (flags){
-		strcpy(globalDirEntries->fileName, filename);
-		globalDirEntries->fileLocation = -1;
-		globalDirEntries-> fileSize=0;
-		globalDirEntries->isaDirectory=0;
-	}
-	
-	
-				// get our own file descriptor
-										// check for error - all used FCB's
-	
-	return (fd);						// all set
-	}
+    if (startup == 0) {
+        b_init();
+    }
+    int dirIndex = -1;
+    for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
+        if (strcmp(globalDirEntries[i].fileName, filename) == 0) {
+            dirIndex = i;
+        }
+    }
 
+    if ((flags == O_RDONLY) && dirIndex == -1) {
+        printf("File not found: %s\n", filename);
+        return -1;
+    }
+    if ((flags == O_RDONLY) && globalDirEntries[dirIndex].isaDirectory == 1) {
+        printf("cannot cat a directory\n");
+        return -1;
+    }
+
+
+    if ((flags !=O_RDONLY) && dirIndex == -1) {
+        int newDirIndex = -1;
+        for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
+            if (globalDirEntries[i].fileName[0] == '\0') {
+                newDirIndex = i;
+                break;
+            }
+        }
+
+        if (newDirIndex == -1) {
+            return -1;
+        }
+
+        strncpy(globalDirEntries[newDirIndex].fileName, filename, strlen(filename));
+        globalDirEntries[newDirIndex].fileSize = 0;
+        globalDirEntries[newDirIndex].fileLocation = -1;
+        globalDirEntries[newDirIndex].isaDirectory = 0;
+
+        time_t currentTime = time(NULL);
+        globalDirEntries[newDirIndex].dateCreated = currentTime;
+        globalDirEntries[newDirIndex].dateAccessed = currentTime;
+        globalDirEntries[newDirIndex].dateModified = currentTime;
+    }
+
+    b_io_fd fd = b_getFCB();
+
+    if (fd < 0) {
+        return -1;
+    }
+    
+    char * buffer = (char*) malloc(B_CHUNK_SIZE * sizeof(char));
+    if (buffer == NULL) {
+
+        return -1;
+    }
+    fcbArray[fd].buf = buffer;
+
+    fcbArray[fd].index = 0;
+    fcbArray[fd].buflen = 0;
+    fcbArray[fd].currentBlk = 0;
+    fcbArray[fd].fi=globalDirEntries[dirIndex];
+
+
+    return fd;
+}
 
 // Interface to seek function	
 int b_seek(b_io_fd fd, off_t offset, int whence)
