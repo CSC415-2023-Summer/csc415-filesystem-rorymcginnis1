@@ -1,10 +1,10 @@
 /**************************************************************
-* Class:  CSC-415
-* Name: Professor Bierman
-* Student ID: N/A
+* Class:  CSC-415-1 Summer 2023
+* Names: Kaung Nay Htet, Himal Shrestha, Rory McGinnis,  James Donnelly
+* Student IDs:922292784, 922399514, 921337245, 917703805
+* GitHub Name: rorymcginnis1
+* Group Name: Team Drivers
 * Project: Basic File System
-*
-* File: mfs.h
 *
 * Description: 
 *	This is the file system interface.
