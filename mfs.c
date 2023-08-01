@@ -8,11 +8,10 @@
 *
 * File: mfs.c
 *
-* Description: The file where we define fs_setcwd , fs_getcwd
-* fs_isFile , fs_isDir ,fs_mkdir ,fs_opendir , fs_readdir
-* fs_closedir , fs_stat
-* And optimally complete
-* fs_delete, fs_rmdir
+* Description: The file where we define fs_setcwd, fs_getcwd
+* 	       fs_isFile, fs_isDir ,fs_mkdir ,fs_opendir , fs_readdir
+* 	       fs_closedir, fs_stat, And optimally complete
+* 	       fs_delete, fs_rmdir
 *
 *
 **************************************************************/
