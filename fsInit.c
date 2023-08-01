@@ -9,7 +9,8 @@
 * File: fsInit.c
 *
 * Description: Main driver for file system assignment.
-*	       This file is where you will start and initialize your system
+*
+* This file is where you will start and initialize your system
 *
 **************************************************************/
 
