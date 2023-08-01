@@ -6,10 +6,9 @@
 * Group Name: Team Drivers
 * Project: Basic File System
 *
-* Description: 
-*	This is the file system interface.
-*	This is the interface needed by the driver to interact with
-*	your filesystem.
+* Description: This is the file system interface.
+*	       This is the interface needed by the driver to interact with
+*	       your filesystem.
 *
 **************************************************************/
 #ifndef _MFS_H
