@@ -129,11 +129,17 @@ int parsePath(int parentParse){ //return int instead void, return i value thats 
     
 }
 
+// sets the current working directory to given path.
 void set_cwd(char* path) {
+    // copies the string pointed to by path 
+    // to the array pointed to by cwd
     strcpy(cwd, path);
 }
 
+// sets temporary current working directory to given path.
 void set_tmpcwd(char* path) {
+    //copies the string pointed to by path 
+    // to the array pointed to by tmpcwd.
     strcpy(tmpcwd, path);
 }
 
@@ -156,6 +162,8 @@ fdDir *fs_opendir(const char *pathname)
     // call parsePath and return index to the path
     int currentFD = parsePath(0);
     // set cwd if necessary
+    //alloc memory for the fdDir structure.
+    //err if fails
     dir = (fdDir *)malloc(sizeof(fdDir));
     if (dir == NULL)
     {
@@ -163,6 +171,7 @@ fdDir *fs_opendir(const char *pathname)
     }
 
     // Need rework for logic figuring out if parsepath is valid or not
+    //if greater than 1 then valid
     if (currentFD > 1)
     {
         printf("Directory to be opened is valid.\n");
@@ -177,9 +186,9 @@ fdDir *fs_opendir(const char *pathname)
     
     
     dir->d_reclen = globalDirEntries[currentFD].fileSize;
-    dir->dirEntryPosition = currentFD;
+    dir->dirEntryPosition = currentFD;//fill dir structur <<^^vv
     dir->directory = globalDirEntries[currentFD];
-    //struct fs_diriteminfo * di;		/* Pointer to the structure you return from read */
+    //struct fs_diriteminfo * di;		
 
     return dir;
     }
@@ -231,14 +240,14 @@ struct fs_diriteminfo *fs_readdir(fdDir * dirp)
 }
 
 int fs_closedir(fdDir * dirp)
-{
+{   //if null invalid directory
     if (dirp == NULL) {
         // invalid dir
         return -1;
     }
-    // dirp->directory = NULL;
+    
 
-    // free dir itself
+    // free dir itself closing directory from fs_opendir
     free(dirp);
     
     return 1;
@@ -251,13 +260,18 @@ int fs_closedir(fdDir * dirp)
 
 int fs_stat( const char *path, struct fs_stat *buf)
 {
+    //runtrhu directories
     for (int i = 0; i < NUM_DIRECT_ENTRIES; i++)
-    {
+    {   //if dur matches entry
         if (strcmp(path, globalDirEntries[i].fileName) == 0)
         {
+            //bytes
             buf->st_size = globalDirEntries[i].fileSize;
+            
             buf->st_blksize = BLOCK_SIZE;
+            //blocks allocated
             buf->st_blocks = (globalDirEntries[i].fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE;
+            
             buf->st_accesstime = globalDirEntries[i].dateAccessed;
             buf->st_modtime = globalDirEntries[i].dateModified;
             buf->st_createtime = globalDirEntries[i].dateCreated;
@@ -265,29 +279,36 @@ int fs_stat( const char *path, struct fs_stat *buf)
             return 0;
         }
     }
-
+    //only gets here if loop completes with no match
     return -1; // File not found
 }
 
 int fs_delete(char* filename)
-{
+{       //run thru directories
 	for (int i=0; i<NUM_DIRECT_ENTRIES; i++){
+        ////if dur matches entry
 		if(strcmp(globalDirEntries[i].fileName, filename) ==0){
+            //empty file name
 			strncpy(globalDirEntries[i].fileName, "", MAX_NAME_LENGTH);
+                //set size 0
     			globalDirEntries[i].fileSize = 0;
+                //reset location
     			globalDirEntries[i].fileLocation = -1;
+                //reset flag
     			globalDirEntries[i].isaDirectory = 1;
     			time_t currentTime = time(NULL);
     			globalDirEntries[i].dateCreated = 0;
     			globalDirEntries[i].dateAccessed = 0;
   			globalDirEntries[i].dateModified = 0;
+            //^^^^^^^^^set the three to 0
+            //print successs
 			printf("File '%s' removed successfully.\n", filename);
 			return 0;
 			
 		}
 	}
-
-return -1;
+//only gets here if loop completes with no match
+return -1;// File not found
 	
 	
 }
@@ -296,9 +317,13 @@ return -1;
 
 
 int fs_rmdir(const char *pathname){
+    //run thru dirs
 	for (int i=0; i<NUM_DIRECT_ENTRIES; i++){
+        //if dir matches
 		if(strcmp(globalDirEntries[i].fileName, pathname) ==0){
+            //if empty
 			if(globalDirEntries[i].fileSize==0){
+                //set to all default to remove dir
 				strncpy(globalDirEntries[i].fileName, "", MAX_NAME_LENGTH);
     				globalDirEntries[i].fileSize = 0;
     				globalDirEntries[i].fileLocation = -1;
@@ -307,12 +332,13 @@ int fs_rmdir(const char *pathname){
     				globalDirEntries[i].dateCreated = 0;
     				globalDirEntries[i].dateAccessed = 0;
   				globalDirEntries[i].dateModified = 0;
+
 				printf("Directory '%s' removed successfully.\n", pathname);
 				return 0;
 			}
 		}
 	}
-	
+	//only gets here if loop completes with no match
 	return -1;
 	
 
@@ -320,8 +346,11 @@ int fs_rmdir(const char *pathname){
 
 
 int fs_isFile(char *filename) {
+    //run thru dirs
     for (int i=0; i < NUM_DIRECT_ENTRIES; i++)
+    //if dir matches
         if (strcmp(filename, globalDirEntries[i].fileName) == 0){
+            //if it does return opposite since 0 is file not dir
             return !globalDirEntries[i].isaDirectory;
         }
         return 0; 
@@ -329,8 +358,11 @@ int fs_isFile(char *filename) {
 }         
 
 int fs_isDir(char *pathname) {
+    //run thru dirs
      for (int i = 0; i < NUM_DIRECT_ENTRIES; i++) {
+        //if dir matches
         if (strcmp(pathname, globalDirEntries[i].fileName) == 0) {
+            //return directory
             return globalDirEntries[i].isaDirectory;
         }
     }
@@ -391,23 +423,24 @@ char * fs_getcwd(char *pathname, size_t size) {
         printf("Invalid buffer.\n");
         return NULL;
     }
-
+    // check size if enough for cwd
     if (strlen(cwd) >= size) {
         printf("Buffer size too small to hold the current working directory.\n");
         return NULL;
     }
 
     // Copy the current working directory to the provided buffer
-
+    //if valid
     strncpy(pathname, cwd, size-1);
 
     pathname[size - 1] = '\0'; // Ensure the buffer is null-terminated
-
+    //return buff
     return pathname;
 }
 
 // Function to set the current working directory
 int fs_setcwd(char* pathname) {
+    ///ifnull invalid
     if (pathname == NULL) {
         return -1; // Invalid input
     }
@@ -427,5 +460,5 @@ int fs_setcwd(char* pathname) {
         strcpy(cwd + strlen(cwd), "/");
     }
 
-    return 0; 
+    return 0; //success
 }
