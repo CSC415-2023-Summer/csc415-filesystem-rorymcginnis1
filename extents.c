@@ -8,9 +8,8 @@
 *
 * File: extents.c
 *
-* Description: The file where we initalize allocate and release
-*
-* blocks for our system
+* Description: The file where we initialize allocate and release
+*              blocks for our system
 *
 **************************************************************/
 
