@@ -1,9 +1,9 @@
 /**************************************************************
-* Class:  CSC-415-0#  Fall 2021
-* Names: 
-* Student IDs:
-* GitHub Name:
-* Group Name:
+* Class:  CSC-415-1 Summer 2023
+* Names: Kaung Nay Htet, Himal Shrestha, Rory McGinnis,  James Donnelly
+* Student IDs:922292784, 922399514, 921337245, 917703805
+* GitHub Name: rorymcginnis1
+* Group Name: Team Drivers
 * Project: Basic File System
 *
 * File: b_io.h
