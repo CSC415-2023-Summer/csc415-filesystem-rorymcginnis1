@@ -8,9 +8,8 @@
 *
 * File: extents.h
 *
-* Description: Header for the file where we initalize allocate and release
-*
-* blocks for our system
+* Description: Header for the file where we initialize allocate and release
+*              blocks for our system
 *
 **************************************************************/
 
